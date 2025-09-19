@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GameHeader } from '@/components/game/GameHeader';
 import { CodeEditor } from '@/components/game/CodeEditor';
 import { TestResults } from '@/components/game/TestResults';
+import { BugInjector } from '@/components/game/BugInjector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTestRunner } from '@/hooks/useTestRunner';
@@ -73,12 +74,38 @@ export const TestDuel = () => {
   const [maxRounds] = useState(5);
   const [turnCompleted, setTurnCompleted] = useState(false);
   const [lastTestResults, setLastTestResults] = useState<any[]>([]);
+  const [gameHistory, setGameHistory] = useState<any[]>([]);
   
   const [originalCode, setOriginalCode] = useState(initialCode);
   const [modifiedCode, setModifiedCode] = useState(initialCode);
   const [testCode, setTestCode] = useState(initialTests);
   
   const { results, isRunning, runTests, clearResults } = useTestRunner();
+
+  // Load game from localStorage on mount
+  useEffect(() => {
+    const savedGame = localStorage.getItem('test-duel-progress');
+    if (savedGame) {
+      const parsed = JSON.parse(savedGame);
+      setGameHistory(parsed.history || []);
+    }
+  }, []);
+
+  // Save game progress to localStorage
+  const saveGameProgress = () => {
+    const gameState = {
+      timestamp: new Date().toISOString(),
+      originalCode,
+      testCode,
+      modifiedCode,
+      score,
+      round,
+      gamePhase,
+      history: gameHistory
+    };
+    localStorage.setItem('test-duel-progress', JSON.stringify(gameState));
+    localStorage.setItem(`test-duel-completed-${Date.now()}`, JSON.stringify(gameState));
+  };
 
   const handleStartGame = () => {
     setGamePhase('playing');
@@ -108,6 +135,17 @@ export const TestDuel = () => {
   };
 
   const handleTurnComplete = () => {
+    // Save round data to history
+    const roundData = {
+      round,
+      player: currentPlayer,
+      code: modifiedCode,
+      tests: testCode,
+      results: results,
+      timestamp: new Date().toISOString()
+    };
+    setGameHistory(prev => [...prev, roundData]);
+
     if (currentPlayer === 2) {
       // Saboteur completed their turn, now Tester tries to catch the bug
       setCurrentPlayer(1);
@@ -135,6 +173,7 @@ export const TestDuel = () => {
   const handleNextRound = () => {
     if (round >= maxRounds || score.player1 >= 3 || score.player2 >= 3) {
       setGamePhase('finished');
+      saveGameProgress(); // Save when game ends
     } else {
       setRound(round + 1);
       setCurrentPlayer(2); // Saboteur always starts the round
@@ -156,19 +195,34 @@ export const TestDuel = () => {
   };
 
   const handleDownloadTests = () => {
-    const testSuite = {
+    const fullTestSuite = {
+      gameInfo: {
+        timestamp: new Date().toISOString(),
+        duration: gameHistory.length > 0 ? 
+          new Date(gameHistory[gameHistory.length - 1].timestamp).getTime() - 
+          new Date(gameHistory[0].timestamp).getTime() : 0,
+        totalRounds: round,
+        finalScore: score,
+        winner: score.player1 > score.player2 ? 'Tester' : 'Saboteur'
+      },
       originalCode,
+      finalCode: modifiedCode,
       finalTests: testCode,
-      results: results,
-      score,
-      timestamp: new Date().toISOString()
+      gameHistory: gameHistory,
+      allTestResults: results,
+      playerActions: gameHistory.map(h => ({
+        round: h.round,
+        player: h.player === 1 ? 'Tester' : 'Saboteur',
+        action: h.player === 1 ? 'Added tests' : 'Modified code',
+        timestamp: h.timestamp
+      }))
     };
     
-    const blob = new Blob([JSON.stringify(testSuite, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(fullTestSuite, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `test-duel-results-${Date.now()}.json`;
+    a.download = `test-duel-complete-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -276,6 +330,15 @@ export const TestDuel = () => {
                 </div>
               )}
             </Card>
+
+            {/* Bug Injection System - only for Saboteur */}
+            {currentPlayer === 2 && !turnCompleted && (
+              <BugInjector
+                code={modifiedCode}
+                onCodeChange={setModifiedCode}
+                disabled={turnCompleted}
+              />
+            )}
 
             <CodeEditor
               title={currentPlayer === 2 ? "Modified Code (Saboteur)" : "Code (Read-only)"}
