@@ -23,24 +23,46 @@ function divide(a, b) {
     throw new Error("Division by zero");
   }
   return a / b;
-}`;
+}
 
-const initialTests = `// Test Suite
-function runTests() {
-  const results = [];
+function isEven(num) {
+  return num % 2 === 0;
+}
+
+// Return all functions to make them available to tests
+return { add, multiply, divide, isEven };`;
+
+const initialTests = `// Test functions - each test should be a named function
+function testAddition() {
+  assertEqual(add(2, 3), 5, "2 + 3 should equal 5");
+  assertEqual(add(-1, 1), 0, "(-1) + 1 should equal 0");
+  assertEqual(add(0, 0), 0, "0 + 0 should equal 0");
+}
+
+function testMultiplication() {
+  assertEqual(multiply(3, 4), 12, "3 × 4 should equal 12");
+  assertEqual(multiply(-2, 5), -10, "(-2) × 5 should equal -10");
+  assertEqual(multiply(0, 100), 0, "0 × 100 should equal 0");
+}
+
+function testDivision() {
+  assertEqual(divide(10, 2), 5, "10 ÷ 2 should equal 5");
+  assertEqual(divide(7, 2), 3.5, "7 ÷ 2 should equal 3.5");
   
-  // Test add function
+  // Test error case
   try {
-    if (add(2, 3) === 5) {
-      results.push({ name: 'add(2, 3)', status: 'passed' });
-    } else {
-      results.push({ name: 'add(2, 3)', status: 'failed', message: 'Expected 5' });
-    }
+    divide(5, 0);
+    assert(false, "Division by zero should throw an error");
   } catch (e) {
-    results.push({ name: 'add(2, 3)', status: 'error', message: e.message });
+    assertEqual(e.message, "Division by zero", "Should throw correct error message");
   }
-  
-  return results;
+}
+
+function testIsEven() {
+  assertTrue(isEven(4), "4 should be even");
+  assertFalse(isEven(3), "3 should not be even");
+  assertTrue(isEven(0), "0 should be even");
+  assertFalse(isEven(-1), "(-1) should not be even");
 }`;
 
 export const TestDuel = () => {
