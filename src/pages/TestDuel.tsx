@@ -71,6 +71,8 @@ export const TestDuel = () => {
   const [score, setScore] = useState({ player1: 0, player2: 0 });
   const [round, setRound] = useState(1);
   const [maxRounds] = useState(5);
+  const [turnCompleted, setTurnCompleted] = useState(false);
+  const [lastTestResults, setLastTestResults] = useState<any[]>([]);
   
   const [originalCode, setOriginalCode] = useState(initialCode);
   const [modifiedCode, setModifiedCode] = useState(initialCode);
@@ -81,20 +83,76 @@ export const TestDuel = () => {
   const handleStartGame = () => {
     setGamePhase('playing');
     setCurrentPlayer(2); // Saboteur goes first
+    setTurnCompleted(false);
   };
 
-  const handleRunTests = () => {
-    runTests(modifiedCode, testCode);
+  const handleRunTests = async () => {
+    await runTests(modifiedCode, testCode);
+    setLastTestResults(results);
+    
+    // Evaluate win/loss conditions
+    if (currentPlayer === 1) { // Tester's turn
+      const failedTests = results.filter(r => r.status === 'failed' || r.status === 'error');
+      
+      if (failedTests.length === 0) {
+        // All tests passed - Tester caught the bug!
+        setScore(prev => ({ ...prev, player1: prev.player1 + 1 }));
+        setTurnCompleted(true);
+      } else {
+        // Tests failed - but this might be expected if Saboteur introduced a good bug
+        setTurnCompleted(true);
+      }
+    } else { // Saboteur's turn - just mark turn as completed
+      setTurnCompleted(true);
+    }
+  };
+
+  const handleTurnComplete = () => {
+    if (currentPlayer === 2) {
+      // Saboteur completed their turn, now Tester tries to catch the bug
+      setCurrentPlayer(1);
+      setTurnCompleted(false);
+      clearResults();
+    } else {
+      // Tester completed their turn, evaluate results
+      const passedTests = results.filter(r => r.status === 'passed').length;
+      const totalTests = results.length;
+      
+      if (passedTests === totalTests && totalTests > 0) {
+        // All tests passed - Tester wins this round
+        console.log("Tester caught the bug!");
+      } else {
+        // Some tests failed - Saboteur's bug wasn't caught
+        setScore(prev => ({ ...prev, player2: prev.player2 + 1 }));
+        console.log("Saboteur's bug wasn't caught!");
+      }
+      
+      // Move to next round or finish game
+      handleNextRound();
+    }
   };
 
   const handleNextRound = () => {
-    if (round >= maxRounds) {
+    if (round >= maxRounds || score.player1 >= 3 || score.player2 >= 3) {
       setGamePhase('finished');
     } else {
       setRound(round + 1);
-      setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
+      setCurrentPlayer(2); // Saboteur always starts the round
+      setTurnCompleted(false);
       clearResults();
+      // Reset code for new round but keep tests from previous rounds
+      setModifiedCode(originalCode);
     }
+  };
+
+  const checkWinCondition = () => {
+    // Win condition: First to 3 points or most points after 5 rounds
+    if (score.player1 >= 3) return 'tester';
+    if (score.player2 >= 3) return 'saboteur';
+    if (round > maxRounds) {
+      return score.player1 > score.player2 ? 'tester' : 'saboteur';
+    }
+    return null;
   };
 
   const handleDownloadTests = () => {
@@ -190,13 +248,32 @@ export const TestDuel = () => {
                 </Badge>
               </div>
               {currentPlayer === 2 ? (
-                <p className="text-sm text-muted-foreground">
-                  <strong>Saboteur:</strong> Modify the code to introduce a subtle bug that existing tests won't catch.
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Saboteur Turn:</strong> Modify the code to introduce a subtle bug that existing tests won't catch.
+                  </p>
+                  {!turnCompleted && (
+                    <p className="text-xs text-warning">
+                      💡 Make your changes, then click "Complete Sabotage" to let the Tester try to catch your bug.
+                    </p>
+                  )}
+                </div>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  <strong>Tester:</strong> Write a test that will catch the saboteur's bug.
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Tester Turn:</strong> Write tests to catch the Saboteur's bug. Run tests to see if you caught it!
+                  </p>
+                  {!turnCompleted && (
+                    <p className="text-xs text-success">
+                      🎯 Add new tests or modify existing ones, then run tests to see if you caught the bug.
+                    </p>
+                  )}
+                  {results.length > 0 && (
+                    <p className="text-xs text-info">
+                      📊 {results.filter(r => r.status === 'passed').length}/{results.length} tests passed
+                    </p>
+                  )}
+                </div>
               )}
             </Card>
 
@@ -218,18 +295,29 @@ export const TestDuel = () => {
             <div className="flex gap-4">
               <Button 
                 onClick={handleRunTests}
-                disabled={isRunning}
+                disabled={isRunning || (currentPlayer === 2 && !turnCompleted)}
                 className="flex-1"
               >
                 {isRunning ? 'Running Tests...' : 'Run Tests'}
               </Button>
-              <Button 
-                onClick={handleNextRound}
-                variant="outline"
-                className="flex-1"
-              >
-                Next Round
-              </Button>
+              
+              {turnCompleted ? (
+                <Button 
+                  onClick={handleTurnComplete}
+                  className="flex-1 bg-gradient-success"
+                >
+                  {currentPlayer === 2 ? 'Complete Sabotage' : 'Complete Testing'}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleNextRound}
+                  variant="outline"
+                  className="flex-1"
+                  disabled={!turnCompleted}
+                >
+                  Next Round
+                </Button>
+              )}
             </div>
           </div>
 
