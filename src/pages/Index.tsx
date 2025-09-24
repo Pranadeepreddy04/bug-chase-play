@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Trophy, Code, Bug, Shield, Zap, Users } from "lucide-react";
+import Header from "@/components/ui/header";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      <Header />
       {/* Hero Section */}
       <section className="relative py-20 px-6">
         <div className="container mx-auto text-center">
