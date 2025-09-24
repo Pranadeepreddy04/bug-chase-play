@@ -43,7 +43,7 @@ const Signup = () => {
         navigate("/login");
       }
     } catch (error) {
-      toast.error("An unexpected error occurred");
+      toast.error("Authentication service not available. Please check your Supabase configuration.");
     } finally {
       setIsLoading(false);
     }

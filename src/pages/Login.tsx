@@ -25,13 +25,17 @@ const Login = () => {
       });
 
       if (error) {
-        toast.error(error.message);
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error("Invalid email or password");
+        } else {
+          toast.error(error.message);
+        }
       } else {
         toast.success("Successfully logged in!");
         navigate("/");
       }
     } catch (error) {
-      toast.error("An unexpected error occurred");
+      toast.error("Authentication service not available. Please check your Supabase configuration.");
     } finally {
       setIsLoading(false);
     }

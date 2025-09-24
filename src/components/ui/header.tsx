@@ -12,10 +12,19 @@ const Header = () => {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.warn('Supabase auth not available:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
 
     // Listen for auth changes
     const {
@@ -28,11 +37,15 @@ const Header = () => {
   }, []);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Error signing out");
-    } else {
-      toast.success("Signed out successfully");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast.error("Error signing out");
+      } else {
+        toast.success("Signed out successfully");
+      }
+    } catch (error) {
+      toast.error("Authentication service not available");
     }
   };
 
