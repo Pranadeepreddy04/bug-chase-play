@@ -71,10 +71,11 @@ export const TestDuel = () => {
   const [currentPlayer, setCurrentPlayer] = useState<1 | 2>(1);
   const [score, setScore] = useState({ player1: 0, player2: 0 });
   const [round, setRound] = useState(1);
-  const [maxRounds] = useState(5);
+  const [maxRounds, setMaxRounds] = useState(5);
   const [turnCompleted, setTurnCompleted] = useState(false);
   const [lastTestResults, setLastTestResults] = useState<any[]>([]);
   const [gameHistory, setGameHistory] = useState<any[]>([]);
+  const [testerGaveUp, setTesterGaveUp] = useState(false);
   
   const [originalCode, setOriginalCode] = useState(initialCode);
   const [modifiedCode, setModifiedCode] = useState(initialCode);
@@ -134,6 +135,25 @@ export const TestDuel = () => {
     }
   };
 
+  const handleTesterGiveUp = () => {
+    // Tester couldn't find a test to catch the bug
+    setTesterGaveUp(true);
+    setScore(prev => ({ ...prev, player2: prev.player2 + 1 }));
+    
+    const roundData = {
+      round,
+      player: currentPlayer,
+      code: modifiedCode,
+      tests: testCode,
+      results: results,
+      action: 'Tester gave up - could not find a test',
+      timestamp: new Date().toISOString()
+    };
+    setGameHistory(prev => [...prev, roundData]);
+    
+    handleNextRound();
+  };
+
   const handleTurnComplete = () => {
     // Save round data to history
     const roundData = {
@@ -150,6 +170,7 @@ export const TestDuel = () => {
       // Saboteur completed their turn, now Tester tries to catch the bug
       setCurrentPlayer(1);
       setTurnCompleted(false);
+      setTesterGaveUp(false);
       clearResults();
     } else {
       // Tester completed their turn, evaluate results
@@ -157,7 +178,8 @@ export const TestDuel = () => {
       const totalTests = results.length;
       
       if (passedTests === totalTests && totalTests > 0) {
-        // All tests passed - Tester wins this round
+        // All tests passed - Tester caught the bug!
+        setScore(prev => ({ ...prev, player1: prev.player1 + 1 }));
         console.log("Tester caught the bug!");
       } else {
         // Some tests failed - Saboteur's bug wasn't caught
@@ -265,6 +287,21 @@ export const TestDuel = () => {
             </div>
             
             <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-card rounded-lg border">
+                <label className="text-sm font-medium">Number of Rounds (N):</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max="10" 
+                  value={maxRounds}
+                  onChange={(e) => setMaxRounds(parseInt(e.target.value) || 5)}
+                  className="w-20 px-3 py-2 rounded-md border bg-background"
+                />
+                <span className="text-xs text-muted-foreground">
+                  Saboteur must introduce {maxRounds} bugs. If Tester catches all, Tester wins!
+                </span>
+              </div>
+
               <CodeEditor
                 title="Initial Program (Player 1: Set up your code)"
                 value={originalCode}
@@ -371,14 +408,21 @@ export const TestDuel = () => {
                 >
                   {currentPlayer === 2 ? 'Complete Sabotage' : 'Complete Testing'}
                 </Button>
+              ) : currentPlayer === 1 ? (
+                <Button 
+                  onClick={handleTesterGiveUp}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  Give Up (Can't Find Test)
+                </Button>
               ) : (
                 <Button 
-                  onClick={handleNextRound}
+                  onClick={() => setTurnCompleted(true)}
                   variant="outline"
                   className="flex-1"
-                  disabled={!turnCompleted}
                 >
-                  Next Round
+                  Mark as Complete
                 </Button>
               )}
             </div>
@@ -405,6 +449,13 @@ export const TestDuel = () => {
               </h3>
               <p className="text-muted-foreground">
                 Final Score: Tester {score.player1} - {score.player2} Saboteur
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                {score.player1 === maxRounds 
+                  ? `🎯 Perfect! Tester caught all ${maxRounds} bugs!` 
+                  : score.player2 > score.player1 
+                  ? '🐛 Saboteur successfully evaded detection!' 
+                  : '🛡️ Tester\'s vigilance prevailed!'}
               </p>
             </div>
             
