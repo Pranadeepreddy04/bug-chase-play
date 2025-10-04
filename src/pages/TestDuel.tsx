@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GameHeader } from '@/components/game/GameHeader';
 import { CodeEditor } from '@/components/game/CodeEditor';
 import { TestResults } from '@/components/game/TestResults';
@@ -8,6 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTestRunner } from '@/hooks/useTestRunner';
 import { Badge } from '@/components/ui/badge';
 import { Zap, Bug, Shield, Download } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 
 type GamePhase = 'setup' | 'playing' | 'finished';
 
@@ -67,6 +71,11 @@ function testIsEven() {
 }`;
 
 export const TestDuel = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [gameStartTime] = useState(Date.now());
+  
   const [gamePhase, setGamePhase] = useState<GamePhase>('setup');
   const [currentPlayer, setCurrentPlayer] = useState<1 | 2>(1);
   const [score, setScore] = useState({ player1: 0, player2: 0 });
@@ -82,6 +91,39 @@ export const TestDuel = () => {
   const [testCode, setTestCode] = useState(initialTests);
   
   const { results, isRunning, runTests, clearResults } = useTestRunner();
+
+  // Check authentication
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          toast.error('Please login to play Test Duel');
+          navigate('/login');
+          return;
+        }
+        setUser(session.user);
+      } catch (error) {
+        console.error('Auth error:', error);
+        toast.error('Authentication required');
+        navigate('/login');
+      } finally {
+        setIsLoadingAuth(false);
+      }
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        navigate('/login');
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   // Load game from localStorage on mount
   useEffect(() => {
@@ -192,10 +234,11 @@ export const TestDuel = () => {
     }
   };
 
-  const handleNextRound = () => {
+  const handleNextRound = async () => {
     if (round >= maxRounds || score.player1 >= 3 || score.player2 >= 3) {
       setGamePhase('finished');
       saveGameProgress(); // Save when game ends
+      await saveGameToDatabase(); // Save to database
     } else {
       setRound(round + 1);
       setCurrentPlayer(2); // Saboteur always starts the round
@@ -203,6 +246,33 @@ export const TestDuel = () => {
       clearResults();
       // Reset code for new round but keep tests from previous rounds
       setModifiedCode(originalCode);
+    }
+  };
+
+  const saveGameToDatabase = async () => {
+    if (!user) return;
+
+    const winner = score.player1 > score.player2 ? 'tester' : 'saboteur';
+    const gameDuration = Date.now() - gameStartTime;
+
+    try {
+      const { error } = await supabase
+        .from('game_scores')
+        .insert({
+          user_id: user.id,
+          tester_score: score.player1,
+          saboteur_score: score.player2,
+          total_rounds: round,
+          winner: winner,
+          game_history: gameHistory,
+          duration_ms: gameDuration,
+        });
+
+      if (error) throw error;
+      toast.success('Game saved successfully!');
+    } catch (error) {
+      console.error('Error saving game:', error);
+      toast.error('Failed to save game to database');
     }
   };
 
@@ -225,7 +295,8 @@ export const TestDuel = () => {
           new Date(gameHistory[0].timestamp).getTime() : 0,
         totalRounds: round,
         finalScore: score,
-        winner: score.player1 > score.player2 ? 'Tester' : 'Saboteur'
+        winner: score.player1 > score.player2 ? 'Tester' : 'Saboteur',
+        playerEmail: user?.email
       },
       originalCode,
       finalCode: modifiedCode,
@@ -248,6 +319,17 @@ export const TestDuel = () => {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  if (isLoadingAuth) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-6 space-y-6">

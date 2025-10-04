@@ -34,13 +34,16 @@ const Signup = () => {
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/duel`
+        }
       });
 
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success("Account created successfully! Please check your email to verify your account.");
-        navigate("/login");
+        toast.success("Account created successfully! You can now start playing.");
+        navigate("/duel");
       }
     } catch (error) {
       toast.error("Authentication service not available. Please check your Supabase configuration.");

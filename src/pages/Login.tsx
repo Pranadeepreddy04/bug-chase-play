@@ -32,7 +32,7 @@ const Login = () => {
         }
       } else {
         toast.success("Successfully logged in!");
-        navigate("/");
+        navigate("/duel");
       }
     } catch (error) {
       toast.error("Authentication service not available. Please check your Supabase configuration.");
