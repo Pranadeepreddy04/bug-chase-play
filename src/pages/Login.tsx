@@ -19,7 +19,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -27,9 +27,14 @@ const Login = () => {
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           toast.error("Invalid email or password");
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error("Please verify your email before logging in. Check your inbox for the verification link.");
         } else {
           toast.error(error.message);
         }
+      } else if (data?.user && !data.user.email_confirmed_at) {
+        await supabase.auth.signOut();
+        toast.error("Please verify your email before logging in. Check your inbox for the verification link.");
       } else {
         toast.success("Successfully logged in!");
         navigate("/duel");

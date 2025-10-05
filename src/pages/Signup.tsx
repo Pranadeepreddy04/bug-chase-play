@@ -6,14 +6,26 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserPlus, ArrowLeft } from "lucide-react";
+import { UserPlus, ArrowLeft, Eye, EyeOff, Check, X } from "lucide-react";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+
+  const passwordValidation = {
+    hasMinLength: password.length >= 8,
+    hasCapital: /[A-Z]/.test(password),
+    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+  };
+
+  const isPasswordValid = passwordValidation.hasMinLength && 
+                          passwordValidation.hasCapital && 
+                          passwordValidation.hasSpecial;
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,8 +35,8 @@ const Signup = () => {
       return;
     }
 
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (!isPasswordValid) {
+      toast.error("Password must meet all requirements");
       return;
     }
 
@@ -35,15 +47,15 @@ const Signup = () => {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/duel`
+          emailRedirectTo: `${window.location.origin}/login`
         }
       });
 
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success("Account created successfully! You can now start playing.");
-        navigate("/duel");
+        toast.success("Account created! Please check your email to verify your account.");
+        navigate("/login");
       }
     } catch (error) {
       toast.error("Authentication service not available. Please check your Supabase configuration.");
@@ -87,28 +99,81 @@ const Signup = () => {
               
               <div>
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="Enter your password"
-                  minLength={6}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="Enter your password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                
+                {password && (
+                  <div className="mt-2 space-y-1">
+                    <div className="flex items-center gap-2 text-xs">
+                      {passwordValidation.hasMinLength ? (
+                        <Check className="h-3 w-3 text-success" />
+                      ) : (
+                        <X className="h-3 w-3 text-destructive" />
+                      )}
+                      <span className={passwordValidation.hasMinLength ? "text-success" : "text-muted-foreground"}>
+                        At least 8 characters
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      {passwordValidation.hasCapital ? (
+                        <Check className="h-3 w-3 text-success" />
+                      ) : (
+                        <X className="h-3 w-3 text-destructive" />
+                      )}
+                      <span className={passwordValidation.hasCapital ? "text-success" : "text-muted-foreground"}>
+                        One capital letter
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      {passwordValidation.hasSpecial ? (
+                        <Check className="h-3 w-3 text-success" />
+                      ) : (
+                        <X className="h-3 w-3 text-destructive" />
+                      )}
+                      <span className={passwordValidation.hasSpecial ? "text-success" : "text-muted-foreground"}>
+                        One special character
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  placeholder="Confirm your password"
-                  minLength={6}
-                />
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="Confirm your password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               <Button 

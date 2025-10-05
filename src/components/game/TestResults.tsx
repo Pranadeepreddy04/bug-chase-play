@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, AlertCircle, Clock } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, Clock, Trophy } from "lucide-react";
+import confetti from "canvas-confetti";
 
 interface TestResult {
   name: string;
@@ -15,6 +17,45 @@ interface TestResultsProps {
 }
 
 export const TestResults = ({ results, isRunning }: TestResultsProps) => {
+  const allPassed = results.length > 0 && results.every(r => r.status === 'passed');
+  const hasFinished = results.length > 0 && !isRunning;
+
+  useEffect(() => {
+    if (hasFinished && allPassed) {
+      // Trigger confetti celebration
+      const duration = 3000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+      function randomInRange(min: number, max: number) {
+        return Math.random() * (max - min) + min;
+      }
+
+      const interval: any = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        });
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        });
+      }, 250);
+
+      return () => clearInterval(interval);
+    }
+  }, [hasFinished, allPassed]);
+
   const getStatusIcon = (status: TestResult['status']) => {
     switch (status) {
       case 'passed':
@@ -53,22 +94,35 @@ export const TestResults = ({ results, isRunning }: TestResultsProps) => {
           <CardTitle className="text-lg font-semibold">Test Results</CardTitle>
           <div className="flex gap-2">
             {summary.passed > 0 && (
-              <Badge className="bg-success/20 text-success border-success/30">
-                {summary.passed} Passed
+              <Badge className="bg-success/20 text-foreground border-success/30 font-semibold">
+                ✓ {summary.passed} Passed
               </Badge>
             )}
             {summary.failed > 0 && (
-              <Badge className="bg-destructive/20 text-destructive border-destructive/30">
-                {summary.failed} Failed
+              <Badge className="bg-destructive/20 text-foreground border-destructive/30 font-semibold">
+                ✗ {summary.failed} Failed
               </Badge>
             )}
             {summary.error > 0 && (
-              <Badge className="bg-warning/20 text-warning border-warning/30">
-                {summary.error} Errors
+              <Badge className="bg-warning/20 text-foreground border-warning/30 font-semibold">
+                ! {summary.error} Errors
               </Badge>
             )}
           </div>
         </div>
+        
+        {hasFinished && allPassed && (
+          <div className="mt-4 p-4 rounded-lg bg-gradient-success border-2 border-success/50 animate-pulse">
+            <div className="flex items-center gap-3 justify-center">
+              <Trophy className="h-8 w-8 text-foreground" />
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-foreground">🎉 Congratulations! 🎉</h3>
+                <p className="text-sm text-foreground/90 mt-1">All tests passed! You're a winner!</p>
+              </div>
+              <Trophy className="h-8 w-8 text-foreground" />
+            </div>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-3">
         {isRunning && (
