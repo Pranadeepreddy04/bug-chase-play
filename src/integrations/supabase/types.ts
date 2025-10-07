@@ -64,21 +64,33 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          otp_expires_at: string | null
+          phone_number: string | null
+          phone_verified: boolean | null
           updated_at: string | null
+          verification_otp: string | null
         }
         Insert: {
           created_at?: string | null
           display_name?: string | null
           email?: string | null
           id: string
+          otp_expires_at?: string | null
+          phone_number?: string | null
+          phone_verified?: boolean | null
           updated_at?: string | null
+          verification_otp?: string | null
         }
         Update: {
           created_at?: string | null
           display_name?: string | null
           email?: string | null
           id?: string
+          otp_expires_at?: string | null
+          phone_number?: string | null
+          phone_verified?: boolean | null
           updated_at?: string | null
+          verification_otp?: string | null
         }
         Relationships: []
       }

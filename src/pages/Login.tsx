@@ -27,20 +27,29 @@ const Login = () => {
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           toast.error("Invalid email or password");
-        } else if (error.message.includes('Email not confirmed')) {
-          toast.error("Please verify your email before logging in. Check your inbox for the verification link.");
         } else {
           toast.error(error.message);
         }
-      } else if (data?.user && !data.user.email_confirmed_at) {
-        await supabase.auth.signOut();
-        toast.error("Please verify your email before logging in. Check your inbox for the verification link.");
-      } else {
-        toast.success("Successfully logged in!");
-        navigate("/duel");
+        return;
       }
+
+      // Check if phone is verified
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('phone_verified')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError || !profile?.phone_verified) {
+        await supabase.auth.signOut();
+        toast.error("Please verify your phone number first. Complete the signup process.");
+        return;
+      }
+
+      toast.success("Successfully logged in!");
+      navigate("/duel");
     } catch (error) {
-      toast.error("Authentication service not available. Please check your Supabase configuration.");
+      toast.error("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
