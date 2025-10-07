@@ -10,7 +10,6 @@ import { UserPlus, ArrowLeft, Eye, EyeOff, Check, X } from "lucide-react";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -41,57 +40,20 @@ const Signup = () => {
       return;
     }
 
-    if (!phoneNumber || phoneNumber.length < 10) {
-      toast.error("Please enter a valid phone number with country code");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      // Create user account
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (error) {
         toast.error(error.message);
-        return;
+      } else {
+        toast.success("Account created successfully! You can now log in.");
+        navigate("/login");
       }
-      
-      if (!data.user) {
-        toast.error("User creation failed");
-        return;
-      }
-
-      // Create profile with phone number
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: data.user.id,
-          email,
-          phone_number: phoneNumber,
-          phone_verified: false,
-        });
-
-      if (profileError) {
-        toast.error("Failed to create profile");
-        return;
-      }
-
-      // Send OTP
-      const { error: otpError } = await supabase.functions.invoke('send-otp', {
-        body: { phoneNumber, userId: data.user.id }
-      });
-
-      if (otpError) {
-        toast.error("Failed to send OTP. Please try again.");
-        return;
-      }
-
-      toast.success("OTP sent! Please check your phone.");
-      navigate("/verify-otp", { state: { userId: data.user.id } });
     } catch (error) {
       toast.error("An error occurred during signup. Please try again.");
     } finally {
@@ -130,21 +92,6 @@ const Signup = () => {
                   required
                   placeholder="Enter your email"
                 />
-              </div>
-
-              <div>
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  required
-                  placeholder="Enter phone with country code (e.g., +1234567890)"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Include country code (e.g., +1234567890)
-                </p>
               </div>
               
               <div>

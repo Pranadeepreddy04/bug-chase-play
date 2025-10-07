@@ -19,7 +19,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -30,19 +30,6 @@ const Login = () => {
         } else {
           toast.error(error.message);
         }
-        return;
-      }
-
-      // Check if phone is verified
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('phone_verified')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profileError || !profile?.phone_verified) {
-        await supabase.auth.signOut();
-        toast.error("Please verify your phone number first. Complete the signup process.");
         return;
       }
 

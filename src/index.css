@@ -18,9 +18,9 @@
     --popover-foreground: 0 0% 95%;
 
     /* Gaming color palette */
-    --primary: 263 70% 50%;
+    --primary: 147 51% 47%;
     --primary-foreground: 0 0% 98%;
-    --primary-glow: 263 70% 65%;
+    --primary-glow: 147 51% 60%;
 
     --secondary: 240 10% 15%;
     --secondary-foreground: 0 0% 90%;
@@ -28,11 +28,11 @@
     --muted: 240 10% 12%;
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 142 70% 45%;
+    --accent: 217 91% 60%;
     --accent-foreground: 0 0% 98%;
 
     /* Game states */
-    --success: 142 76% 36%;
+    --success: 147 51% 47%;
     --success-foreground: 0 0% 98%;
     
     --warning: 38 92% 50%;
@@ -43,14 +43,14 @@
 
     --border: 240 10% 15%;
     --input: 240 10% 12%;
-    --ring: 263 70% 50%;
+    --ring: 147 51% 47%;
 
     --radius: 0.75rem;
 
     /* Gaming gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-gaming: linear-gradient(135deg, hsl(263 70% 30%), hsl(220 70% 40%));
-    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(142 70% 50%));
+    --gradient-gaming: linear-gradient(135deg, hsl(147 51% 35%), hsl(160 51% 45%));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(147 51% 55%));
     --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(240 10% 9%));
 
     /* Shadows and glows */
@@ -75,7 +75,7 @@
 
   body {
     @apply bg-background text-foreground font-mono;
-    background: radial-gradient(ellipse at top, hsl(263 70% 15% / 0.3), hsl(var(--background)));
+    background: radial-gradient(ellipse at top, hsl(147 51% 12% / 0.3), hsl(var(--background)));
   }
 }
 

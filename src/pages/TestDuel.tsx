@@ -4,6 +4,7 @@ import { GameHeader } from '@/components/game/GameHeader';
 import { CodeEditor } from '@/components/game/CodeEditor';
 import { TestResults } from '@/components/game/TestResults';
 import { BugInjector } from '@/components/game/BugInjector';
+import { WinnerCelebration } from '@/components/game/WinnerCelebration';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTestRunner } from '@/hooks/useTestRunner';
@@ -85,6 +86,8 @@ export const TestDuel = () => {
   const [lastTestResults, setLastTestResults] = useState<any[]>([]);
   const [gameHistory, setGameHistory] = useState<any[]>([]);
   const [testerGaveUp, setTesterGaveUp] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [winner, setWinner] = useState<'tester' | 'saboteur' | null>(null);
   
   const [originalCode, setOriginalCode] = useState(initialCode);
   const [modifiedCode, setModifiedCode] = useState(initialCode);
@@ -236,15 +239,17 @@ export const TestDuel = () => {
 
   const handleNextRound = async () => {
     if (round >= maxRounds || score.player1 >= 3 || score.player2 >= 3) {
+      const gameWinner = score.player1 > score.player2 ? 'tester' : 'saboteur';
+      setWinner(gameWinner);
       setGamePhase('finished');
-      saveGameProgress(); // Save when game ends
-      await saveGameToDatabase(); // Save to database
+      setShowCelebration(true);
+      saveGameProgress();
+      await saveGameToDatabase();
     } else {
       setRound(round + 1);
-      setCurrentPlayer(2); // Saboteur always starts the round
+      setCurrentPlayer(2);
       setTurnCompleted(false);
       clearResults();
-      // Reset code for new round but keep tests from previous rounds
       setModifiedCode(originalCode);
     }
   };
@@ -517,48 +522,59 @@ export const TestDuel = () => {
       )}
 
       {gamePhase === 'finished' && (
-        <Card className="bg-gradient-success border-success/20 shadow-success">
-          <CardHeader>
-            <CardTitle className="text-center text-2xl">Game Complete!</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-6">
-            <div className="text-6xl font-bold text-glow">
-              {score.player1 > score.player2 ? '🛡️' : '🐛'}
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">
-                {score.player1 > score.player2 ? 'Tester Wins!' : 'Saboteur Wins!'}
-              </h3>
-              <p className="text-muted-foreground">
-                Final Score: Tester {score.player1} - {score.player2} Saboteur
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {score.player1 === maxRounds 
-                  ? `🎯 Perfect! Tester caught all ${maxRounds} bugs!` 
-                  : score.player2 > score.player1 
-                  ? '🐛 Saboteur successfully evaded detection!' 
-                  : '🛡️ Tester\'s vigilance prevailed!'}
-              </p>
-            </div>
-            
-            <div className="flex gap-4 justify-center">
-              <Button 
-                onClick={handleDownloadTests}
-                variant="outline"
-                className="gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Download Test Suite
-              </Button>
-              <Button 
-                onClick={() => window.location.reload()}
-                className="bg-gradient-primary"
-              >
-                Play Again
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <>
+          {showCelebration && winner && (
+            <WinnerCelebration 
+              winner={winner} 
+              onClose={() => setShowCelebration(false)} 
+            />
+          )}
+          
+          <Card className="bg-gradient-to-br from-card via-card/95 to-primary/5 border-primary/30 shadow-2xl">
+            <CardHeader>
+              <CardTitle className="text-center text-3xl bg-gradient-primary bg-clip-text text-transparent">
+                Game Complete!
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-6">
+              <div className="text-7xl font-bold animate-bounce">
+                {score.player1 > score.player2 ? '🛡️' : '🐛'}
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-2xl font-bold text-primary">
+                  {score.player1 > score.player2 ? 'Tester Wins!' : 'Saboteur Wins!'}
+                </h3>
+                <p className="text-lg text-foreground/80">
+                  Final Score: <span className="font-semibold text-primary">Tester {score.player1}</span> - <span className="font-semibold text-accent">Saboteur {score.player2}</span>
+                </p>
+                <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto">
+                  {score.player1 === maxRounds 
+                    ? `🎯 Perfect! Tester caught all ${maxRounds} bugs!` 
+                    : score.player2 > score.player1 
+                    ? '🐛 Saboteur successfully evaded detection!' 
+                    : '🛡️ Tester\'s vigilance prevailed!'}
+                </p>
+              </div>
+              
+              <div className="flex gap-4 justify-center pt-4">
+                <Button 
+                  onClick={handleDownloadTests}
+                  variant="outline"
+                  className="gap-2 border-primary/30 hover:border-primary/50"
+                >
+                  <Download className="h-4 w-4" />
+                  Download Test Suite
+                </Button>
+                <Button 
+                  onClick={() => window.location.reload()}
+                  className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                >
+                  Play Again
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );
