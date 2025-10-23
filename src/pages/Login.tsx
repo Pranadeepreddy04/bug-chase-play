@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
-import { LampCharacter } from "@/components/ui/LampCharacter";
+import { LampWithCord } from "@/components/ui/LampWithCord";
 import { motion } from "framer-motion";
 
 const Login = () => {
@@ -16,8 +16,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [lampState, setLampState] = useState<"off" | "on" | "happy" | "sad">("off");
-  const [isFocused, setIsFocused] = useState(false);
+  const [lampIsOn, setLampIsOn] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -31,19 +30,16 @@ const Login = () => {
       });
 
       if (error) {
-        setLampState("sad");
         if (error.message.includes('Invalid login credentials')) {
           toast.error("Invalid email or password");
         } else {
           toast.error(error.message);
         }
-        setTimeout(() => setLampState(isFocused ? "on" : "off"), 2000);
         return;
       }
 
-      setLampState("happy");
       toast.success("Successfully logged in!");
-      setTimeout(() => navigate("/duel"), 1000);
+      setTimeout(() => navigate("/duel"), 500);
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     } finally {
@@ -52,151 +48,140 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-background dark:via-background dark:to-background flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[#121921] flex items-center justify-center p-6 gap-8 flex-wrap">
+      <div className="absolute top-6 left-6">
         <Link 
           to="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Link>
+      </div>
+
+      <LampWithCord isOn={lampIsOn} onToggle={setLampIsOn} />
         
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+        animate={{ 
+          opacity: lampIsOn ? 1 : 0,
+          scale: lampIsOn ? 1 : 0.8,
+          y: lampIsOn ? 0 : 20
+        }}
+        transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+        style={{ pointerEvents: lampIsOn ? "all" : "none" }}
+      >
+        <Card 
+          className="backdrop-blur-sm border-2 shadow-2xl min-w-[320px]"
+          style={{
+            background: "rgba(18, 25, 33, 0.9)",
+            borderColor: lampIsOn ? "var(--glow-color)" : "transparent",
+            boxShadow: lampIsOn 
+              ? "0 0 15px rgba(255, 255, 255, 0.1), 0 0 30px var(--glow-color), inset 0 0 15px rgba(255, 255, 255, 0.05)"
+              : "0 0 0px rgba(255, 255, 255, 0)"
+          }}
         >
-          <Card className="bg-white/80 dark:bg-gradient-card backdrop-blur-sm border-primary/20 shadow-2xl">
-            <CardHeader className="text-center pb-4">
-              <LampCharacter state={lampState} />
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
-                Welcome back ✨
-              </CardTitle>
-              <p className="text-muted-foreground mt-2 text-sm">
-                Sign in to brighten your day — the lamp is cheering you on
-              </p>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <form onSubmit={handleLogin} className="space-y-5">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
+          <CardHeader className="text-center pb-4">
+            <CardTitle 
+              className="text-3xl font-bold text-white mb-2"
+              style={{ textShadow: "0 0 8px var(--glow-color)" }}
+            >
+              Welcome Back
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2 px-10 pb-12">
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div>
+                <Label 
+                  htmlFor="email" 
+                  className="text-sm font-medium block mb-2"
+                  style={{ color: "#aaa", textShadow: "0 0 5px var(--glow-color)" }}
                 >
-                  <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={() => {
-                      setIsFocused(true);
-                      setLampState("on");
-                    }}
-                    onBlur={() => {
-                      setIsFocused(false);
-                      setLampState("off");
-                    }}
-                    required
-                    placeholder="you@example.com"
-                    className="mt-1.5 bg-white/50 dark:bg-background/50 border-2 focus:border-yellow-400 transition-all duration-300"
-                  />
-                </motion.div>
-                
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="you@example.com"
+                  className="w-full bg-white/5 border-2 border-white/10 text-white placeholder:text-gray-600 focus:border-[var(--glow-color)] focus:shadow-[0_0_10px_var(--glow-color)] focus:bg-white/8 transition-all duration-300"
+                  style={{ borderRadius: "10px" }}
+                />
+              </div>
+              
+              <div>
+                <Label 
+                  htmlFor="password" 
+                  className="text-sm font-medium block mb-2"
+                  style={{ color: "#aaa", textShadow: "0 0 5px var(--glow-color)" }}
                 >
-                  <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => {
-                      setIsFocused(true);
-                      setLampState("on");
-                    }}
-                    onBlur={() => {
-                      setIsFocused(false);
-                      setLampState("off");
-                    }}
-                    required
-                    placeholder="••••••••"
-                    className="mt-1.5 bg-white/50 dark:bg-background/50 border-2 focus:border-yellow-400 transition-all duration-300"
-                  />
-                </motion.div>
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  className="w-full bg-white/5 border-2 border-white/10 text-white placeholder:text-gray-600 focus:border-[var(--glow-color)] focus:shadow-[0_0_10px_var(--glow-color)] focus:bg-white/8 transition-all duration-300"
+                  style={{ borderRadius: "10px" }}
+                />
+              </div>
 
-                <motion.div 
-                  className="flex items-center justify-between"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="remember" 
-                      checked={rememberMe}
-                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                    />
-                    <label
-                      htmlFor="remember"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Remember me
-                    </label>
-                  </div>
-                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                    Forgot password?
-                  </Link>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-base py-6" 
-                    disabled={isLoading}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="remember" 
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="remember"
+                    className="text-sm font-medium leading-none text-gray-400"
                   >
-                    {isLoading ? (
-                      <span className="flex items-center gap-2">
-                        <motion.span
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        >
-                          ⚡
-                        </motion.span>
-                        Signing in...
-                      </span>
-                    ) : (
-                      "Log in"
-                    )}
-                  </Button>
-                </motion.div>
-              </form>
+                    Remember me
+                  </label>
+                </div>
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm text-gray-500 hover:text-[var(--glow-color)] transition-all duration-300"
+                  style={{ textShadow: "0 0 10px var(--glow-color)" }}
+                >
+                  Forgot password?
+                </Link>
+              </div>
 
-              <motion.div 
-                className="mt-6 text-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
+              <Button 
+                type="submit" 
+                className="w-full text-white font-semibold shadow-lg hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 text-base py-6 border-none" 
+                disabled={isLoading}
+                style={{
+                  background: "linear-gradient(135deg, var(--glow-color), var(--glow-color-dark))",
+                  borderRadius: "10px"
+                }}
               >
-                <p className="text-sm text-muted-foreground">
+                {isLoading ? "Signing in..." : "Login"}
+              </Button>
+
+              <div className="text-center">
+                <p className="text-sm text-gray-500">
                   Don't have an account?{" "}
-                  <Link to="/signup" className="text-primary hover:underline font-semibold">
+                  <Link 
+                    to="/signup" 
+                    className="text-gray-400 hover:text-[var(--glow-color)] transition-all duration-300 font-semibold"
+                    style={{ textShadow: "0 0 10px var(--glow-color)" }}
+                  >
                     Sign up
                   </Link>
                 </p>
-              </motion.div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };

@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserPlus, ArrowLeft, Eye, EyeOff, Check, X } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Check, X } from "lucide-react";
+import { LampWithCord } from "@/components/ui/LampWithCord";
+import { motion } from "framer-motion";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -15,6 +17,7 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [lampIsOn, setLampIsOn] = useState(false);
   const navigate = useNavigate();
 
   const passwordValidation = {
@@ -62,40 +65,78 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[#121921] flex items-center justify-center p-6 gap-8 flex-wrap">
+      <div className="absolute top-6 left-6">
         <Link 
           to="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Link>
+      </div>
+
+      <LampWithCord isOn={lampIsOn} onToggle={setLampIsOn} />
         
-        <Card className="bg-gradient-card border-primary/20 shadow-card">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <UserPlus className="h-6 w-6 text-primary" />
-              <CardTitle className="text-2xl">Create Account</CardTitle>
-            </div>
-            <p className="text-muted-foreground">Join the Test Duel community</p>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+        animate={{ 
+          opacity: lampIsOn ? 1 : 0,
+          scale: lampIsOn ? 1 : 0.8,
+          y: lampIsOn ? 0 : 20
+        }}
+        transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+        style={{ pointerEvents: lampIsOn ? "all" : "none" }}
+      >
+        <Card 
+          className="backdrop-blur-sm border-2 shadow-2xl min-w-[320px]"
+          style={{
+            background: "rgba(18, 25, 33, 0.9)",
+            borderColor: lampIsOn ? "var(--glow-color)" : "transparent",
+            boxShadow: lampIsOn 
+              ? "0 0 15px rgba(255, 255, 255, 0.1), 0 0 30px var(--glow-color), inset 0 0 15px rgba(255, 255, 255, 0.05)"
+              : "0 0 0px rgba(255, 255, 255, 0)"
+          }}
+        >
+          <CardHeader className="text-center pb-4">
+            <CardTitle 
+              className="text-3xl font-bold text-white mb-2"
+              style={{ textShadow: "0 0 8px var(--glow-color)" }}
+            >
+              Create Account
+            </CardTitle>
+            <p className="text-gray-400 text-sm">Join the Test Duel community</p>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSignup} className="space-y-4">
+          <CardContent className="pt-2 px-10 pb-12">
+            <form onSubmit={handleSignup} className="space-y-5">
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label 
+                  htmlFor="email" 
+                  className="text-sm font-medium block mb-2"
+                  style={{ color: "#aaa", textShadow: "0 0 5px var(--glow-color)" }}
+                >
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="Enter your email"
+                  placeholder="you@example.com"
+                  className="w-full bg-white/5 border-2 border-white/10 text-white placeholder:text-gray-600 focus:border-[var(--glow-color)] focus:shadow-[0_0_10px_var(--glow-color)] focus:bg-white/8 transition-all duration-300"
+                  style={{ borderRadius: "10px" }}
                 />
               </div>
               
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label 
+                  htmlFor="password" 
+                  className="text-sm font-medium block mb-2"
+                  style={{ color: "#aaa", textShadow: "0 0 5px var(--glow-color)" }}
+                >
+                  Password
+                </Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -103,13 +144,14 @@ const Signup = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    placeholder="Enter your password"
-                    className="pr-10"
+                    placeholder="••••••••"
+                    className="w-full bg-white/5 border-2 border-white/10 text-white placeholder:text-gray-600 focus:border-[var(--glow-color)] focus:shadow-[0_0_10px_var(--glow-color)] focus:bg-white/8 transition-all duration-300 pr-10"
+                    style={{ borderRadius: "10px" }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -119,31 +161,31 @@ const Signup = () => {
                   <div className="mt-2 space-y-1">
                     <div className="flex items-center gap-2 text-xs">
                       {passwordValidation.hasMinLength ? (
-                        <Check className="h-3 w-3 text-success" />
+                        <Check className="h-3 w-3 text-green-400" />
                       ) : (
-                        <X className="h-3 w-3 text-destructive" />
+                        <X className="h-3 w-3 text-red-400" />
                       )}
-                      <span className={passwordValidation.hasMinLength ? "text-success" : "text-muted-foreground"}>
+                      <span className={passwordValidation.hasMinLength ? "text-green-400" : "text-gray-500"}>
                         At least 8 characters
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
                       {passwordValidation.hasCapital ? (
-                        <Check className="h-3 w-3 text-success" />
+                        <Check className="h-3 w-3 text-green-400" />
                       ) : (
-                        <X className="h-3 w-3 text-destructive" />
+                        <X className="h-3 w-3 text-red-400" />
                       )}
-                      <span className={passwordValidation.hasCapital ? "text-success" : "text-muted-foreground"}>
+                      <span className={passwordValidation.hasCapital ? "text-green-400" : "text-gray-500"}>
                         One capital letter
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
                       {passwordValidation.hasSpecial ? (
-                        <Check className="h-3 w-3 text-success" />
+                        <Check className="h-3 w-3 text-green-400" />
                       ) : (
-                        <X className="h-3 w-3 text-destructive" />
+                        <X className="h-3 w-3 text-red-400" />
                       )}
-                      <span className={passwordValidation.hasSpecial ? "text-success" : "text-muted-foreground"}>
+                      <span className={passwordValidation.hasSpecial ? "text-green-400" : "text-gray-500"}>
                         One special character
                       </span>
                     </div>
@@ -152,7 +194,13 @@ const Signup = () => {
               </div>
 
               <div>
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label 
+                  htmlFor="confirmPassword" 
+                  className="text-sm font-medium block mb-2"
+                  style={{ color: "#aaa", textShadow: "0 0 5px var(--glow-color)" }}
+                >
+                  Confirm Password
+                </Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
@@ -160,13 +208,14 @@ const Signup = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    placeholder="Confirm your password"
-                    className="pr-10"
+                    placeholder="••••••••"
+                    className="w-full bg-white/5 border-2 border-white/10 text-white placeholder:text-gray-600 focus:border-[var(--glow-color)] focus:shadow-[0_0_10px_var(--glow-color)] focus:bg-white/8 transition-all duration-300 pr-10"
+                    style={{ borderRadius: "10px" }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                   >
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -175,24 +224,32 @@ const Signup = () => {
 
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300" 
+                className="w-full text-white font-semibold shadow-lg hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 text-base py-6 border-none" 
                 disabled={isLoading}
+                style={{
+                  background: "linear-gradient(135deg, var(--glow-color), var(--glow-color-dark))",
+                  borderRadius: "10px"
+                }}
               >
                 {isLoading ? "Creating account..." : "Create Account"}
               </Button>
-            </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-muted-foreground">
-                Already have an account?{" "}
-                <Link to="/login" className="text-primary hover:underline">
-                  Sign in
-                </Link>
-              </p>
-            </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-500">
+                  Already have an account?{" "}
+                  <Link 
+                    to="/login" 
+                    className="text-gray-400 hover:text-[var(--glow-color)] transition-all duration-300 font-semibold"
+                    style={{ textShadow: "0 0 10px var(--glow-color)" }}
+                  >
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+            </form>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     </div>
   );
 };
