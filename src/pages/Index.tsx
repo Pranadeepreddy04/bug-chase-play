@@ -20,6 +20,8 @@ const Index = () => {
             The ultimate competitive programming game where testing skills determine victory. 
             Can you catch the bugs or create the perfect trap?
           </p>
+
+          {/* Test section: for creating a profile*/}
           
           <div className="flex gap-4 justify-center">
             <Link to="/duel">
