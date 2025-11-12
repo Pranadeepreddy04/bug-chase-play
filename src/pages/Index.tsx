@@ -5,6 +5,16 @@ import { Link } from "react-router-dom";
 import { Trophy, Code, Bug, Shield, Zap, Users} from "lucide-react";
 import Header from "@/components/ui/header";
 
+
+
+
+// tring to do some bootstrap imports
+/// note: we might have to import a container into here as well?
+// ok: we want to keep the THREE things that we want to import
+
+import {Container, Row, Col} from 'react-bootstrap';
+
+
 const Index = () => {
   return (
     <>
@@ -29,35 +39,48 @@ const Index = () => {
       - make the buttons vertical (might have to put in some kind of container)
       */}
 
-      {/* Issue: this picxel amount prevents DYNAMIC movement*/}
-      <div style = {{ position: 'relative', left: '900px'}}>
-          <Card>
+      {/* Issue: this pixel amount prevents DYNAMIC movement*/}
+      <div>
+          {/* We also want to set the size of the card */}
+          <Card style = {{backgroundColor: 'blue', width: '300px', height : '300px',
+            position: 'relative', left: '900px', top: '100px'
+          }}>
 
               {/*Note: we will eventually remove this */}
-              <CardHeader>
+              {/*<CardHeader>
                 <CardTitle className="text-xl">Test profile dropdown</CardTitle>
-              </CardHeader>
-
-              <div style={{ backgroundColor: 'blue'}}>
+              </CardHeader>*/}
 
               <CardContent className="profile-card-content">
 
                 {/* We need buttons for: profile, settings */}
-                {/* **The buttons need to be placed VERTICALLY on top of one-another */}
+                {/* **The buttons need to be placed VERTICALLY on top of one-another 
+                for this...we need a column with rows
+                */}
 
-                
-                <Button size="lg" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 gap-2">
-                <Zap className="h-5 w-5" />
-                Profile
-              </Button>
-              <Button size="lg" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 gap-2">
-                <Zap className="h-5 w-5" />
-                Settingse
-              </Button>
+              <Container>
+                <Col>
+                  <Row>
+                     <Button size="sm" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 gap-2">
+                        <Zap className="h-5 w-5" />
+                        Profile
+                      </Button>
+                  </Row>
+                  <Row>
+                      <Button size="sm" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 gap-2">
+                        <Zap className="h-5 w-5" />
+                        Settings
+                      </Button>
+                  </Row>
+                </Col>
+              </Container>
+              
+
+             
+              
                 
               </CardContent>
 
-              </div>
         </Card>
       </div>
 
@@ -80,17 +103,6 @@ const Index = () => {
             The ultimate competitive programming game where testing skills determine victory. 
             Can you catch the bugs or create the perfect trap?
           </p>
-
-          {/* Test section: for creating a profile*/}
-           <div className="Profile-stuff">
-            <Link to="/profile">
-              <Button size="lg" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 gap-2">
-                <Zap className="h-5 w-5" />
-                Profile
-              </Button>
-            </Link>
-          </div>
-          {/* TODO: we need to get some stuff onhover under the name/profile image*/}
 
 
 

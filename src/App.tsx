@@ -10,6 +10,8 @@ import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 const queryClient = new QueryClient();
 
 const App = () => (
