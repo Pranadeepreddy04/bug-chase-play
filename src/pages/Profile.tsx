@@ -8,7 +8,7 @@ import Header from "@/components/ui/header";
 const Profile = () => {
   return (
     <div className="Profile-main">
-          <p>Loading...</p>
+          <p>Test profile text</p>
       </div>
   )
 }

@@ -4,6 +4,10 @@
 
 /* Gaming-inspired design system for Test Duel platform */
 
+.profile-card-content{
+  color : #121080
+}
+
 @layer base {
   :root {
     /* Core backgrounds */

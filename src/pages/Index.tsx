@@ -2,13 +2,73 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Trophy, Code, Bug, Shield, Zap, Users } from "lucide-react";
+import { Trophy, Code, Bug, Shield, Zap, Users} from "lucide-react";
 import Header from "@/components/ui/header";
 
 const Index = () => {
   return (
+    <>
+
     <div className="min-h-screen bg-background relative">
       <Header />
+
+      {/* <body>
+        <h1>Main Content Area</h1>
+        <iframe src="subscreen.html" width="800" height="600" frameborder="0"></iframe>
+      </body> */}
+
+      {/* Card for the menu dropdown:
+      should be conditional on a user being signed-in
+      should be a large on-click over the USER selection
+      let's base it on the potluck app
+      */}
+
+      {/* TODO:
+      - change the position of the card (to the right almost all the way)
+      -- maybe need to make another DIV encapsulating the whole card
+      - make the buttons vertical (might have to put in some kind of container)
+      */}
+
+      {/* Issue: this picxel amount prevents DYNAMIC movement*/}
+      <div style = {{ position: 'relative', left: '900px'}}>
+          <Card>
+
+              {/*Note: we will eventually remove this */}
+              <CardHeader>
+                <CardTitle className="text-xl">Test profile dropdown</CardTitle>
+              </CardHeader>
+
+              <div style={{ backgroundColor: 'blue'}}>
+
+              <CardContent className="profile-card-content">
+
+                {/* We need buttons for: profile, settings */}
+                {/* **The buttons need to be placed VERTICALLY on top of one-another */}
+
+                
+                <Button size="lg" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 gap-2">
+                <Zap className="h-5 w-5" />
+                Profile
+              </Button>
+              <Button size="lg" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 gap-2">
+                <Zap className="h-5 w-5" />
+                Settingse
+              </Button>
+                
+              </CardContent>
+
+              </div>
+        </Card>
+      </div>
+
+
+
+      
+      
+
+
+
+
       {/* Hero Section */}
       <section className="relative py-20 px-6">
         <div className="container mx-auto text-center">
@@ -22,6 +82,18 @@ const Index = () => {
           </p>
 
           {/* Test section: for creating a profile*/}
+           <div className="Profile-stuff">
+            <Link to="/profile">
+              <Button size="lg" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 gap-2">
+                <Zap className="h-5 w-5" />
+                Profile
+              </Button>
+            </Link>
+          </div>
+          {/* TODO: we need to get some stuff onhover under the name/profile image*/}
+
+
+
           
           <div className="flex gap-4 justify-center">
             <Link to="/duel">
@@ -137,6 +209,8 @@ const Index = () => {
         </div>
       </section>
     </div>
+
+    </>
   );
 };
 
