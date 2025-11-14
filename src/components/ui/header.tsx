@@ -1,10 +1,25 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect } from "react";
+import React from 'react';
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { Trophy, LogIn, UserPlus, LogOut, User as UserIcon } from "lucide-react";
+
+// we need to import the index page into here (pages)
+// import Header from "@/components/ui/header";
+
+import Index from "@/pages/Index.tsx";
+
+// let's set the context up here:
+export const MyContext = React.createContext([]);
+
+// now a variable to USE for the context (regarding the click of the profile button)
+/// Q: could we also pass the USER into it? But maybe we are not able to do multiple values?
+const [profileButtonClicked, setProfileButtonClicked] = useState(false);
+
 
 const Header = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -49,6 +64,24 @@ const Header = () => {
     }
   };
 
+  const handleProfileClick = async () => {
+    // in here, we will need to set the context for the "profileButtonClicked" (sending it over to the main page)
+
+    // issue: what do we put inside of the context provider??
+    /// oh, ok: we need to put the child component inside of it (which in this case is teh main page, index.tsx)
+    return (
+      <MyContext.Provider value={[profileButtonClicked, setProfileButtonClicked]}>
+        <Index />
+      </MyContext.Provider>
+    )
+
+    // now that we've provided the context, we can go onto trying to receive it (along with the user) in Index.tsx
+
+    
+    
+
+  }
+
   if (isLoading) {
     return (
       <header className="absolute top-0 left-0 right-0 z-10 p-6">
@@ -79,7 +112,17 @@ const Header = () => {
             <>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <UserIcon className="h-4 w-4" />
+
+                {/* Wrapping this user email with a profile button */}
+                <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleProfileClick}
+                className="gap-2"
+              >
                 <span>{user.email}</span>
+              </Button>
+       
               </div>
               <Button 
                 variant="outline" 

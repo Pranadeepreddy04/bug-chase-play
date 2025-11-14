@@ -5,6 +5,14 @@ import { Link } from "react-router-dom";
 import { Trophy, Code, Bug, Shield, Zap, Users} from "lucide-react";
 import Header from "@/components/ui/header";
 
+// we need to import some stuff from react, it looks like
+
+import React, {useState, useContext} from "react";
+
+import {MyContext} from "@/components/ui/header";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+
 
 
 
@@ -16,6 +24,28 @@ import {Container, Row, Col} from 'react-bootstrap';
 
 
 const Index = () => {
+
+
+  // let's define some variables for the button clicked context, as well as the user in here??
+  const [profileButtonClicked, setProfileButtonClicked] = useContext(MyContext);
+  // TODO: I might need to just provide an async function (as done in "header") in order to get data into here
+  const [user, setUser] = useState<User | null>(null);
+
+  const initAuth = async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          setUser(session?.user ?? null);
+        } catch (error) {
+          console.warn('Supabase auth not available:', error);
+          setUser(null);
+        }
+        finally {
+          console.log("Test");
+        }
+      };
+
+  // result: RIP - it's still not running (but still think I'll commit anyway)
+
   return (
     <>
 
