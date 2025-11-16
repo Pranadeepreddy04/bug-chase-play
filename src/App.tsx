@@ -10,16 +10,42 @@ import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 
+import React, {useState} from 'react';
+
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+import Header from '@/components/ui/header';
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+export const MyContext = React.createContext([]);
+
+const App = () => {
+  {/* Adding the context in here, copying over from the context provider class*/}
+
+  {/* Before adding the context, we have to try to convert the app to a regular function... */}
+
+  const [profileButtonClicked, setProfileButtonClicked] = useState(false); 
+
+  return (
+
+    <>
+
+    {/* Let's test a simple paragraph */}
+    
+
+    <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
+
+
+      
+
       <BrowserRouter>
+        
+        <MyContext.Provider value={[profileButtonClicked, setProfileButtonClicked]}>
+        
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/duel" element={<TestDuel />} />
@@ -31,9 +57,23 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+
+        </MyContext.Provider>
+
+       
+        
+
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+
+  
+
+
+
+  </>
+  )
+  
+};
 
 export default App;

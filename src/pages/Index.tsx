@@ -1,15 +1,17 @@
+// Big Q: are the curly braces to represent an EXPORTED component?
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Trophy, Code, Bug, Shield, Zap, Users} from "lucide-react";
-import Header from "@/components/ui/header";
+import Header from '@/components/ui/header';
+
+import {MyContext} from "@/App";
 
 // we need to import some stuff from react, it looks like
 
-import React, {useState, useContext} from "react";
-
-import {MyContext} from "@/components/ui/header";
+import React, {useState, useEffect, useContext} from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 
@@ -25,13 +27,44 @@ import {Container, Row, Col} from 'react-bootstrap';
 
 const Index = () => {
 
-
   // let's define some variables for the button clicked context, as well as the user in here??
-  const [profileButtonClicked, setProfileButtonClicked] = useContext(MyContext);
-  // TODO: I might need to just provide an async function (as done in "header") in order to get data into here
-  const [user, setUser] = useState<User | null>(null);
 
-  const initAuth = async () => {
+  // **big issue: the context cannot be constant, so we likely need to assign it to a useState thing...
+  const [profileButtonClicked, setProfileButtonClicked] = useContext(MyContext);
+
+  // let's try to do a useEffect to get the context (for rendering)??
+
+  // let's create a state variable for showing the profile dropdown (finally made it to an easy part)
+
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
+
+
+ 
+
+  // now after receiving the context, let's do a test print of it
+  console.log("Test print of the context received in index ");
+  console.log(profileButtonClicked);
+
+
+  // ok...it finally worked: so now I just need to make the app re-render the card.
+
+  // do I need to make an actual STATE variable for this? Maybe I do...
+  //// maybe try to set the state variable using the "use effect" thing that I have from icsi 518
+
+  useEffect(() => {
+    setShowProfileDropdown(profileButtonClicked);
+  })
+
+  console.log("Have we changed the showProfileDropdown thing in here yet??" + showProfileDropdown)
+  
+  
+
+
+  // TODO: I might need to just provide an async function (as done in "header") in order to get data into here
+  /* const [user, setUser] = useState<User | null>(null);
+
+   const initAuth = async () => {
         try {
           const { data: { session } } = await supabase.auth.getSession();
           setUser(session?.user ?? null);
@@ -42,7 +75,7 @@ const Index = () => {
         finally {
           console.log("Test");
         }
-      };
+      }; */
 
   // result: RIP - it's still not running (but still think I'll commit anyway)
 
@@ -71,9 +104,12 @@ const Index = () => {
 
       {/* Issue: this pixel amount prevents DYNAMIC movement*/}
       <div>
-          {/* We also want to set the size of the card */}
-          <Card style = {{backgroundColor: 'blue', width: '300px', height : '300px',
-            position: 'relative', left: '900px', top: '100px'
+          {/* Trying to make the card conditional on some things */}
+
+          {/* For the style, the top thing only worked iif the position was fixed...*/}
+          
+          {profileButtonClicked ? (<Card style = {{backgroundColor: 'blue', width: '300px', height : '300px',
+            position: 'fixed', left: '70%', top: '20%', zIndex: 1000
           }}>
 
               {/*Note: we will eventually remove this */}
@@ -111,7 +147,13 @@ const Index = () => {
                 
               </CardContent>
 
-        </Card>
+        </Card>)
+
+        : (<div></div>)
+        }
+          
+          
+          
       </div>
 
 
