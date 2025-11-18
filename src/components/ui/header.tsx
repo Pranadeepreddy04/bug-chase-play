@@ -61,6 +61,13 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
+
+
+      // new thing: first we need to set the show profile from the context to false (note - we get this from App.tsx)
+      /// no...we ALREADY have this...
+      setProfileButtonClicked(false);
+
+
       const { error } = await supabase.auth.signOut();
       if (error) {
         toast.error("Error signing out");

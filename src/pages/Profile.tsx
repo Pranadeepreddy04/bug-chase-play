@@ -2,14 +2,91 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Trophy, Code, Bug, Shield, Zap, Users } from "lucide-react";
+import { Trophy, UserPlus, Code, Bug, Shield, Zap, Users } from "lucide-react";
 import Header from "@/components/ui/header";
+
+// let's get the container stuff from bootstrap
+import {Container, Row, Col, CardBody} from 'react-bootstrap';
 
 const Profile = () => {
   return (
-    <div className="Profile-main">
-          <p>Test profile text</p>
-      </div>
+
+    
+
+    <>
+
+    {/* next thing to try to do: get the background looking good 
+    -- **we also need to color the logos/images correctly
+    */}
+      <Container>
+        <Row>
+          {/* Logo image - reference from header*/}
+          
+          <Col>
+            <Trophy className="h-12 w-12 text-primary" />
+          </Col>
+            
+          {/* Profile image - reference from header*/}
+          <Col>
+            <UserPlus className="h-8 w-8" />
+          </Col>
+          
+          {/*Column for personal info (we need text to display on separte rows, one way or another */}
+          <Col>
+            <p>Email</p>
+            <p>Display name</p>
+            <p>Created at</p>
+          </Col>
+
+        </Row>
+
+      </Container>
+
+      <Container className = "bottomContainer">
+        <Card>
+          {/*We need 3 sub-cards, each of which having the same style*/}
+
+          {
+            /*Style things we may weant to do for these: Color, textcolor...*/
+          }
+
+          {/* Issue/TODO: the css sheet is still not working, so I might want to figure that out (for now, I'm just repeating styles in here) */}
+
+          <Card className = "profileStatCard" style = {{backgroundColor : 'rgba(151, 132, 132, 1)', width: '50%'}}>
+            <CardHeader>
+              <b>Wins as Tester</b>
+            </CardHeader>
+            <CardBody>
+              <p>&emsp; 10</p>
+            </CardBody>
+            
+          </Card>
+          {/* Issue: can we make another card that has the same classname?? Yes, let's go*/}
+          <Card className = "profileStatCard" style = {{backgroundColor : 'gray'}}>
+            <CardHeader>
+              <b>Wins as Saboteur</b>
+            </CardHeader>
+            <CardBody>
+              <p>&emsp; 10</p>
+            </CardBody>
+          </Card>
+
+          <Card className = "profileStatCard" style = {{backgroundColor : 'gray'}}>
+            <CardHeader>
+              <b>Total Number of Games Played</b>
+            </CardHeader>
+            <CardBody>
+              <p>&emsp; 10</p>
+            </CardBody>
+          </Card>
+
+          {/* Another potential to-do: make these sub-cards functions, since they keep getting repeated?? */}
+
+
+        </Card>
+      </Container>
+    </> 
+
   )
 }
 

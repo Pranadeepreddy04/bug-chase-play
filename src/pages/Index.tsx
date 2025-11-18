@@ -36,7 +36,7 @@ const Index = () => {
 
   // let's create a state variable for showing the profile dropdown (finally made it to an easy part)
 
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  ////const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
 
 
@@ -52,11 +52,11 @@ const Index = () => {
   // do I need to make an actual STATE variable for this? Maybe I do...
   //// maybe try to set the state variable using the "use effect" thing that I have from icsi 518
 
-  useEffect(() => {
+  /* useEffect(() => {
     setShowProfileDropdown(profileButtonClicked);
-  })
+  }) */
 
-  console.log("Have we changed the showProfileDropdown thing in here yet??" + showProfileDropdown)
+  ////console.log("Have we changed the showProfileDropdown thing in here yet??" + showProfileDropdown)
   
   
 
@@ -127,10 +127,14 @@ const Index = () => {
               <Container>
                 <Col>
                   <Row>
+
+                    {/* Update 11-17: we need to make this profile button actually link somewhere*/}
+                     <Link to="/profile">
                      <Button size="sm" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 gap-2">
                         <Zap className="h-5 w-5" />
                         Profile
                       </Button>
+                      </Link>
                   </Row>
                   <Row>
                       <Button size="sm" className="bg-gradient-primary hover:shadow-glow transition-all duration-300 gap-2">
