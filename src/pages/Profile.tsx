@@ -8,7 +8,34 @@ import Header from "@/components/ui/header";
 // let's get the container stuff from bootstrap
 import {Container, Row, Col, CardBody} from 'react-bootstrap';
 
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import React, {useState} from 'react';
+
 const Profile = () => {
+
+    const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Get initial session
+      const initAuth = async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          setUser(session?.user ?? null);
+        } catch (error) {
+          console.warn('Supabase auth not available:', error);
+          setUser(null);
+        } finally {
+          
+        }
+      };
+
+      initAuth();
+
+      // Test print of the user we've found
+      console.log(user)
+
+
   return (
 
     <>
@@ -16,14 +43,17 @@ const Profile = () => {
     {/* Let's try to place everything inside a main div - step by step */}
     {/* Oh, ok maybe the issue was that I had a classname on the container? Now we can just continue working outer to inner on this*/}
     <div className="min-h-screen bg-background relative">
+      {/* 1st container */}
       <Container>
         <Row>
           {/* Logo image - reference from header*/}
           
-          <Col>
-            <Trophy className="h-12 w-12 text-primary" />
+          <Col style = {{display: 'flex'}}>
+            {/* Let's try to get this better from the header, but DON'T make it link back yet...*/}
+            <Trophy className="h-12 w-12 text-primary"/>
+            <span className="text-xl font-bold">Test Duel</span>
           </Col>
-            
+
           {/* Profile image - reference from header*/}
           <Col>
             <UserPlus className="h-8 w-8" />
@@ -31,7 +61,7 @@ const Profile = () => {
           
           {/*Column for personal info (we need text to display on separte rows, one way or another */}
           <Col>
-            <p>Email</p>
+            <p>{user.email}</p>
             <p>Display name</p>
             <p>Created at</p>
           </Col>
@@ -45,10 +75,12 @@ const Profile = () => {
     */}
       
       
-
+      {/* 2nd container */}
       <Container>
         {/* Outer card in the 2nd class - we want this to have width 50%*/}
-        <Card style = {{width : '50%'}}>
+        <Card style = {{width : '50%', height: '50%', textAlign: 'center', backgroundColor : 'rgb(88, 83, 83)'}}>
+        <p>Game Stats for --User--</p>
+
           {/*We need 3 sub-cards, each of which having the same style*/}
 
           {
@@ -61,11 +93,13 @@ const Profile = () => {
           Q: are these widths and height relative to the nearest div?
           A: actually parent element
           But then why isn't it working with respect to the card? (particularly the height isn't)
+
+          width : '90%', height : '20%', 
           */}
 
 
-          <div style = {{width : '90%', height : '20%', margin: 'auto'}}>
-            <Card className = "profileStatCard" style = {{backgroundColor : 'rgba(151, 132, 132, 1)', width: '50%'}}>
+          <div style = {{margin: '5% 5%'}}>
+            <Card className = "profileStatCard" style = {{backgroundColor : 'gray', textAlign : 'left'}}>
             <CardHeader>
               <b>Wins as Tester</b>
             </CardHeader>
@@ -75,7 +109,7 @@ const Profile = () => {
             
             </Card>
             {/* Issue: can we make another card that has the same classname?? Yes, let's go*/}
-            <Card className = "profileStatCard" style = {{backgroundColor : 'gray'}}>
+            <Card className = "profileStatCard" style = {{backgroundColor : 'gray', textAlign : 'left'}}>
               <CardHeader>
                 <b>Wins as Saboteur</b>
               </CardHeader>
@@ -84,7 +118,7 @@ const Profile = () => {
               </CardBody>
             </Card>
 
-            <Card className = "profileStatCard" style = {{backgroundColor : 'gray'}}>
+            <Card className = "profileStatCard" style = {{backgroundColor : 'gray', textAlign : 'left'}}>
               <CardHeader>
                 <b>Total Number of Games Played</b>
               </CardHeader>
