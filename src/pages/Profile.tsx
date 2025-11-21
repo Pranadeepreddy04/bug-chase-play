@@ -141,6 +141,10 @@ const Profile = () => {
       // Test print of the user we've found
       ////console.log(user.email)
 
+      // test variable for setting the subcards
+
+      const [subCardHovered, setSubCardHovered] = useState(false);
+
 
   return (
 
@@ -179,6 +183,8 @@ const Profile = () => {
               <p>Joined {user.created_at.substring(0, 10)}</p>
               </Col>)
             : (<Col>
+            {/*Might need to put a better loading icon here */}
+            <p>Loading personal info...</p>
             </Col>)
           }
 
@@ -197,7 +203,7 @@ const Profile = () => {
       <Container>
         {/* Outer card in the 2nd class - we want this to have width 50%*/}
         <Card style = {{width : '50%', height: '50%', textAlign: 'center', backgroundColor : 'rgb(88, 83, 83)'}}>
-        <p>Game Stats for --User--</p>
+        <p>Game Stats for {displayName}</p>
 
           {/*We need 3 sub-cards, each of which having the same style*/}
 
@@ -217,15 +223,26 @@ const Profile = () => {
 
 
           <div style = {{margin: '5% 5%'}}>
-            <Card className = "profileStatCard" style = {{backgroundColor : 'gray', textAlign : 'left'}}>
-            <CardHeader>
-              <b>Wins as Tester</b>
-            </CardHeader>
-            <CardBody>
-              <p>&emsp; 10</p>
-            </CardBody>
+
+            {/* Putting a div around the card to do onmouseenter */}
+            <div onMouseEnter={() => setSubCardHovered(true)} 
+            onMouseLeave={() => setSubCardHovered(false)}>
+              <Card className = "profileStatCard" style = {{backgroundColor : subCardHovered ? 'yellow' : 'gray', textAlign : 'left',
+              }}>
+              <CardHeader>
+                <b>Wins as Tester</b>
+              </CardHeader>
+              <CardBody>
+                <p>&emsp; 10</p>
+              </CardBody>
+              </Card>
+            </div>
             
-            </Card>
+            
+            
+            
+            
+            
             {/* Issue: can we make another card that has the same classname?? Yes, let's go*/}
             <Card className = "profileStatCard" style = {{backgroundColor : 'gray', textAlign : 'left'}}>
               <CardHeader>
