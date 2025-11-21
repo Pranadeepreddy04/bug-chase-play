@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Trophy, UserPlus, Code, Bug, Shield, Zap, Users } from "lucide-react";
 import Header from "@/components/ui/header";
+import profileStatCard from "@/components/ui/profileStatCard";
 
 // let's get the container stuff from bootstrap
 import {Container, Row, Col, CardBody} from 'react-bootstrap';
@@ -11,6 +12,7 @@ import {Container, Row, Col, CardBody} from 'react-bootstrap';
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import React, {useState, useEffect} from 'react';
+import ProfileStatCard from "@/components/ui/profileStatCard";
 
 const Profile = () => {
 
@@ -19,6 +21,10 @@ const Profile = () => {
 
     // let's get the display name (string) from the profiles
     const [displayName, setDisplayName] = useState('');
+
+    const [winsAsTester, setWinsAsTester] = useState(null);
+    const [winsAsSaboteur, setWinsAsSaboteur] = useState(null);
+    const [totalGamesPlayed, setTotalGamesPlayed] = useState(null);
 
 
     // Get initial session (note: we need to do useEffect in order for things not to keeep rendering over and over)
@@ -94,6 +100,8 @@ const Profile = () => {
                 console.log("Test print - count of the wins as tester")
                 console.log(count);
 
+                setWinsAsTester(count);
+
                 // LET'S GO!!
 
               
@@ -110,6 +118,7 @@ const Profile = () => {
 
                 console.log("Test print - count of the wins as saboteur")
                 console.log(count);
+                setWinsAsSaboteur(count);
 
                 // LET'S GO!!
 
@@ -125,11 +134,13 @@ const Profile = () => {
 
                 console.log("Test print - count of TOTAL GAMES FINISHED");
                 console.log(count);
+                setTotalGamesPlayed(count);
                 // result: just the same issue
             }
 
             fetchFromProfiles();
             getWinsAsTester();
+            getWinsAsSaboteur();
             getTotalGamesPlayed();
 
         // in here, we need to put the user variable as the depdendency
@@ -213,54 +224,22 @@ const Profile = () => {
 
           {/* Issue/TODO: the css sheet is still not working, so I might want to figure that out (for now, I'm just repeating styles in here) */}
 
-          {/*Div for around the inner cards 
-          Q: are these widths and height relative to the nearest div?
-          A: actually parent element
-          But then why isn't it working with respect to the card? (particularly the height isn't)
-
-          width : '90%', height : '20%', 
-          */}
-
 
           <div style = {{margin: '5% 5%'}}>
 
-            {/* Putting a div around the card to do onmouseenter */}
-            <div onMouseEnter={() => setSubCardHovered(true)} 
-            onMouseLeave={() => setSubCardHovered(false)}>
-              <Card className = "profileStatCard" style = {{backgroundColor : subCardHovered ? 'yellow' : 'gray', textAlign : 'left',
-              }}>
-              <CardHeader>
-                <b>Wins as Tester</b>
-              </CardHeader>
-              <CardBody>
-                <p>&emsp; 10</p>
-              </CardBody>
-              </Card>
-            </div>
-            
-            
-            
-            
-            
-            
-            {/* Issue: can we make another card that has the same classname?? Yes, let's go*/}
-            <Card className = "profileStatCard" style = {{backgroundColor : 'gray', textAlign : 'left'}}>
-              <CardHeader>
-                <b>Wins as Saboteur</b>
-              </CardHeader>
-              <CardBody>
-                <p>&emsp; 10</p>
-              </CardBody>
-            </Card>
+           {/* Making the first card based on profile stat card */}
 
-            <Card className = "profileStatCard" style = {{backgroundColor : 'gray', textAlign : 'left'}}>
-              <CardHeader>
-                <b>Total Number of Games Played</b>
-              </CardHeader>
-              <CardBody>
-                <p>&emsp; 10</p>
-              </CardBody>
-            </Card>
+           <ProfileStatCard cardName = {"Wins as Tester"} cardData = {winsAsTester}/>
+           <ProfileStatCard cardName = {"Wins as Saboteur"} cardData = {winsAsSaboteur}/>
+           <ProfileStatCard cardName = {"Total Games Finished"} cardData = {totalGamesPlayed}/>
+
+            
+            
+            
+            
+            
+            
+            
           </div>
           
 

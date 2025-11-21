@@ -7,6 +7,9 @@ import { Link } from "react-router-dom";
 import { Trophy, Code, Bug, Shield, Zap, Users} from "lucide-react";
 import Header from '@/components/ui/header';
 
+// let's try to create a hovercard in here now
+import { HoverCard } from "@/components/ui/hover-card";
+
 import {MyContext} from "@/App";
 
 // we need to import some stuff from react, it looks like
@@ -108,8 +111,8 @@ const Index = () => {
 
           {/* For the style, the top thing only worked iif the position was fixed...*/}
           
-          {profileButtonClicked ? (<Card style = {{backgroundColor: 'blue', width: '300px', height : '300px',
-            position: 'fixed', left: '70%', top: '20%', zIndex: 1000
+          {profileButtonClicked ? (<Card style = {{backgroundColor: 'blue', width: '30%', height : '30%',
+            position: 'fixed', left: '70%', top: '10%', zIndex: 1000
           }}>
 
               {/*Note: we will eventually remove this */}
@@ -117,7 +120,7 @@ const Index = () => {
                 <CardTitle className="text-xl">Test profile dropdown</CardTitle>
               </CardHeader>*/}
 
-              <CardContent className="profile-card-content">
+              
 
                 {/* We need buttons for: profile, settings */}
                 {/* **The buttons need to be placed VERTICALLY on top of one-another 
@@ -149,7 +152,7 @@ const Index = () => {
              
               
                 
-              </CardContent>
+              
 
         </Card>)
 
