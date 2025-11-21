@@ -10,30 +10,136 @@ import {Container, Row, Col, CardBody} from 'react-bootstrap';
 
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 const Profile = () => {
 
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Get initial session
-      const initAuth = async () => {
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          setUser(session?.user ?? null);
-        } catch (error) {
-          console.warn('Supabase auth not available:', error);
-          setUser(null);
-        } finally {
-          
-        }
-      };
+    // let's get the display name (string) from the profiles
+    const [displayName, setDisplayName] = useState('');
 
-      initAuth();
+
+    // Get initial session (note: we need to do useEffect in order for things not to keeep rendering over and over)
+      useEffect(() => {
+          // Get initial session
+          const initAuth = async () => {
+            try {
+              const { data: { session } } = await supabase.auth.getSession();
+              setUser(session?.user ?? null);
+              
+              console.log("Successfully retrieved the user");
+              console.log(user);
+
+
+            } catch (error) {
+              console.warn('Supabase auth not available:', error);
+              setUser(null);
+            } finally {
+              setIsLoading(false);
+            }
+          };
+          initAuth();
+          
+        }, []);
+
+        
+
+
+        // Trying to do a 2nd use-effect with dependencies
+        useEffect(() => {
+            // we need an async function to do the work
+            const fetchFromProfiles = async () => {
+              /* const { data, error } = await supabase
+              .from('your_table_name')
+              .select('*') // Select all columns
+              .eq('id', 123) // Filter by a specific ID
+              .single(); */
+
+             
+              const {data, error } = await supabase
+              .from('profiles')
+              .select('*') // Select all columns
+              .eq('id', user.id) // Filter by a specific ID
+              .single();
+              // now, we need to do a test print of the data we've received
+              console.log("Data from the profiles table: ");
+              console.log(data);
+
+
+              // now that we have this data, let's use it to set the display name...
+              setDisplayName(data.display_name);
+              
+
+              
+
+              // *after we know we've received it, then we can add it to a data item
+
+            }
+
+            // to get this to work, we need a count query
+            const getWinsAsTester = async () => {
+              /* const { count, error } = await supabase
+  .from('your_table_name')
+  .select('*', { count: 'exact', head: true })
+  .eq('column_name', 'your_value'); */
+
+                const { count, error } = await supabase
+                .from('game_scores')
+                .select('*', { count: 'exact', head: true })
+                // the where condition for the winner
+                .eq('winner', 'tester');
+
+                console.log("Test print - count of the wins as tester")
+                console.log(count);
+
+                // LET'S GO!!
+
+              
+            }
+
+            const getWinsAsSaboteur = async () => {
+            
+
+                const { count, error } = await supabase
+                .from('game_scores')
+                .select('*', { count: 'exact', head: true })
+                // the where condition for the winner
+                .eq('winner', 'saboteur');
+
+                console.log("Test print - count of the wins as saboteur")
+                console.log(count);
+
+                // LET'S GO!!
+
+              
+            }
+            // now finally, we just need to get the total number of games played (would it have to be the sum)?
+
+            const getTotalGamesPlayed = async () => {
+              const { count, error } = await supabase
+                .from('game_scores')
+                .select('*', { count: 'exact', head: true})
+                // the where condition for the winner
+
+                console.log("Test print - count of TOTAL GAMES FINISHED");
+                console.log(count);
+                // result: just the same issue
+            }
+
+            fetchFromProfiles();
+            getWinsAsTester();
+            getTotalGamesPlayed();
+
+        // in here, we need to put the user variable as the depdendency
+        }, [user])
+
+        
+
 
       // Test print of the user we've found
-      console.log(user)
+      ////console.log(user.email)
 
 
   return (
@@ -59,12 +165,24 @@ const Profile = () => {
             <UserPlus className="h-8 w-8" />
           </Col>
           
-          {/*Column for personal info (we need text to display on separte rows, one way or another */}
-          <Col>
-            <p>{user.email}</p>
-            <p>Display name</p>
-            <p>Created at</p>
-          </Col>
+          {/*Column for personal info (we need text to display on separte rows, one way or another 
+          -- let's make it CONDIONAL now
+          */}
+
+          {user && (displayName != '')
+            ? (<Col>
+              {/* Issue: how do we get this name? 
+              -- looking in the migrations, we'd need to do a fetch from public.profiles
+              */}
+              <p>@{displayName}</p>
+              <p>{user.email}</p>
+              <p>Joined {user.created_at.substring(0, 10)}</p>
+              </Col>)
+            : (<Col>
+            </Col>)
+          }
+
+          
 
         </Row>
 
