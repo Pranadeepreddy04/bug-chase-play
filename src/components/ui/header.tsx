@@ -77,10 +77,12 @@ const Header = () => {
         <div className="flex items-center gap-2">
           {user ? (
             <>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <UserIcon className="h-4 w-4" />
-                <span>{user.email}</span>
-              </div>
+              <Link to="/profile">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <UserIcon className="h-4 w-4" />
+                  Profile
+                </Button>
+              </Link>
               <Button 
                 variant="outline" 
                 size="sm" 
