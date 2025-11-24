@@ -13,7 +13,8 @@ const ProfileStatCard = ({cardName, cardData}) => {
         <>
         <div onMouseEnter={() => setSubCardHovered(true)} 
             onMouseLeave={() => setSubCardHovered(false)}>
-              <Card style = {{backgroundColor : subCardHovered ? 'green' : 'gray', textAlign : 'left',
+              {/* New style 11-22: different shades of gray - maybe we actually want it to LIGHT up (light gray) when we click on it*/}
+              <Card style = {{color: 'black', backgroundColor : subCardHovered ? 'lightGray' : 'gray', textAlign : 'left',
               }}>
               <CardHeader>
                 <b>{cardName}</b>

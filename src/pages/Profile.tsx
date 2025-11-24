@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import React, {useState, useEffect} from 'react';
 import ProfileStatCard from "@/components/ui/profileStatCard";
+import { ArrowLeft } from "lucide-react";
 
 const Profile = () => {
 
@@ -167,6 +168,23 @@ const Profile = () => {
       {/* 1st container */}
       <Container>
         <Row>
+
+          {/* First col will be a button for going back to home */}
+          
+          <div classname="absolute top-6 left-6">
+  <Link 
+          to="/" 
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+            </Link>
+          
+          </div>
+          {/*Ok, the div w/ out a column might be the best we can get */}
+          
+
+
           {/* Logo image - reference from header*/}
           
           <Col style = {{display: 'flex'}}>
@@ -213,7 +231,7 @@ const Profile = () => {
       {/* 2nd container */}
       <Container>
         {/* Outer card in the 2nd class - we want this to have width 50%*/}
-        <Card style = {{width : '50%', height: '50%', textAlign: 'center', backgroundColor : 'rgb(88, 83, 83)'}}>
+        <Card style = {{width : '30%', height: '20%', textAlign: 'center', backgroundColor : 'rgb(88, 83, 83)'}}>
         <p>Game Stats for {displayName}</p>
 
           {/*We need 3 sub-cards, each of which having the same style*/}

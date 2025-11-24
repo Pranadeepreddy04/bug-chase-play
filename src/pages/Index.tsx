@@ -111,7 +111,7 @@ const Index = () => {
 
           {/* For the style, the top thing only worked iif the position was fixed...*/}
           
-          {profileButtonClicked ? (<Card style = {{backgroundColor: 'blue', width: '30%', height : '30%',
+          {profileButtonClicked ? (<Card style = {{backgroundColor: 'blue', width: '18%', height : '30%',
             position: 'fixed', left: '70%', top: '10%', zIndex: 1000
           }}>
 
