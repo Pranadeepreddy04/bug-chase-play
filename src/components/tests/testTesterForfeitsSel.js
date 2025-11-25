@@ -78,37 +78,25 @@ async function testButton() {
 
         // let's store the buttons OUTSIDE the error thing may - so we can still find them after we get an error
 
-
         // note: let creates a mutable variable
         let loginButton = null;
         let signoutButton = null;
 
-
+        // Create a double try-catch block to catch each exception separately
         try {
-
             await driver.get('http://192.168.1.167:8080/');
-            // First, we're trying to make sure that the header has EITHER login or sign-out on it
-            loginButton = await driver.wait(until.elementLocated(By.id('loginButton')), 10000);
-            // test: what if one of the buttons is for start duel??
-            
-
-            // ok, we found the buttons.
-            // big issue though: what if the first button fails. Then, is it possible to get the 2nd one?
-
-            // so maybe we can do a try/catch individually for these??
-
-            
-
+            loginButton = await driver.findElement(By.id('loginButton'));
         }
         // I think we need to try to catch errors in here, since we are doing an either-or for the button
         catch (error) {
-            // do nothing yet??
+            console.log("Login not found");
         }
         try {
-            signoutButton = await driver.wait(until.elementLocated(By.id('signOutButton')), 10000);
+            //signoutButton = await driver.wait(until.elementLocated(By.id('signOutButton')), 10000);
+            signoutButton = await driver.findElement(By.id('signOutButton'));
         }
         catch (error){
-
+            console.log("Sign-out not found");
         }
 
 
@@ -136,8 +124,124 @@ async function testButton() {
 
     }
 
+    // Test 2: the basic tester-gives-up
+    async function testerGivesUp() {
+
+        let driver = await new Builder().forBrowser('chrome').build();
+
+        // important prereq for thsis: we need to make sure we are LOGGED IN on the home page
+        // let's see if we log in on chrome, whether it works
+
+
+        try {
+		    await driver.get('http://192.168.1.167:8080/duel'); 
+            // do the login
+            const emailField = await driver.findElement(By.id('email')); // Or By.name, By.css, By.xpath
+            await emailField.sendKeys('jkoplik@albany.edu'); // Replace with actual username
+            const passwordField = await driver.findElement(By.id('password')); // Or By.name, By.css, By.xpath
+            // password redacted
+            await passwordField.sendKeys('########');
+
+
+            const startTestDuelButton = await driver.wait(until.elementLocated(By.id('startTestDuelButton')), 3000);
+            startTestDuelButton.click();
+            
+            // Do all the following 5 times
+            // Mark Complete (completeTestsButton)
+            // compelte sabotage (completeSabotage)
+            // then give up (giveUpButton)
+            for (let i = 0; i < 5; i++) {
+                const completeTestsButton = await driver.wait(until.elementLocated(By.id('completeTestsButton')), 3000);
+                completeTestsButton.click();
+                const completeSabotageButton = await driver.wait(until.elementLocated(By.id('completeSabotageButton')), 3000);
+                completeSabotageButton.click();
+                const giveUpButton = await driver.wait(until.elementLocated(By.id('giveUpButton')), 3000);
+                giveUpButton.click();
+
+
+            }
+
+            // at the end of this, we need to assert that the saboteur has won
+            // id is winnerCelebration
+            const winnerCelebration = await driver.wait(until.elementLocated(By.id('winnerCelebration')), 3000);
+            // now, what can we get from the winner celebration? (ok, maybe the winner...)
+            const winner = winnerCelebration.getAttribute("winner");
+            // now, we must make sure that the winner is the SABORTUER
+            assert.strictEqual(winner, "saboteur");
+        }
+        finally {
+            await driver.quit();
+        }
+
+    }
+
+    // Test 3: the basic tester-gives-up, but they also put in an off-by-one error
+
+    async function testerGivesUp2() {
+        
+
+        let driver = await new Builder().forBrowser('chrome').build();
+
+        // important prereq for thsis: we need to make sure we are LOGGED IN on the home page
+        // let's see if we log in on chrome, whether it works
+
+
+        try {
+		    await driver.get('http://192.168.1.167:8080/duel'); 
+            // do the login
+            const emailField = await driver.findElement(By.id('email')); // Or By.name, By.css, By.xpath
+            await emailField.sendKeys('jkoplik@albany.edu'); // Replace with actual username
+            const passwordField = await driver.findElement(By.id('password')); // Or By.name, By.css, By.xpath
+            // password redacted
+            await passwordField.sendKeys('########');
+
+
+            const startTestDuelButton = await driver.wait(until.elementLocated(By.id('startTestDuelButton')), 3000);
+            startTestDuelButton.click();
+
+            // only difference from the above function: once we get into the duel page, we need to apply the off-by-one error
+            const offByOneButton = await driver.findElement(By.Key('off-by-one'));
+            const applyButton = offByOneButton.getAttribute("applyError");
+
+
+
+            
+            // Do all the following 5 times
+            // Mark Complete (completeTestsButton)
+            // compelte sabotage (completeSabotage)
+            // then give up (giveUpButton)
+            for (let i = 0; i < 5; i++) {
+                const completeTestsButton = await driver.wait(until.elementLocated(By.id('completeTestsButton')), 3000);
+                completeTestsButton.click();
+                const completeSabotageButton = await driver.wait(until.elementLocated(By.id('completeSabotageButton')), 3000);
+                completeSabotageButton.click();
+                const giveUpButton = await driver.wait(until.elementLocated(By.id('giveUpButton')), 3000);
+                giveUpButton.click();
+
+
+            }
+
+            // at the end of this, we need to assert that the saboteur has won
+            // id is winnerCelebration
+            const winnerCelebration = await driver.wait(until.elementLocated(By.id('winnerCelebration')), 3000);
+            // now, what can we get from the winner celebration? (ok, maybe the winner...)
+            const winner = winnerCelebration.getAttribute("winner");
+            // now, we must make sure that the winner is the SABORTUER
+            assert.strictEqual(winner, "saboteur");
+        }
+        finally {
+            await driver.quit();
+        }
+    }
+
+
+
+
+
+
 
     //testButton();
     testHeaderPage();
+    //testerGivesUp();
 
 
