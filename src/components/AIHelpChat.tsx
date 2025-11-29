@@ -50,11 +50,14 @@ export const AIHelpChat = () => {
     }
   }, [isOpen]);
 
-  const handleQuestionSelect = (type: QuestionType, question: string) => {
+  const handleQuestionSelect = (type: QuestionType, question: string, codeContext?: string) => {
     setQuestionType(type);
     setShowQuestions(false);
-    setMessages([{ role: "user", content: question }]);
-    sendMessage(question, type);
+    const messageWithContext = type === "explainCode" && codeContext 
+      ? `${question}\n\nHere's the code I'm looking at:\n\`\`\`javascript\n${codeContext}\n\`\`\``
+      : question;
+    setMessages([{ role: "user", content: messageWithContext }]);
+    sendMessage(messageWithContext, type);
   };
 
   const sendMessage = async (messageText: string, type: QuestionType = questionType) => {
@@ -218,7 +221,16 @@ export const AIHelpChat = () => {
                 <span className="font-semibold">2. How to play</span>
               </Button>
               <Button
-                onClick={() => handleQuestionSelect("explainCode", "Can you explain the code with examples?")}
+                onClick={() => {
+                  // Get code from localStorage if available
+                  const savedGame = localStorage.getItem('test-duel-progress');
+                  let codeContext = '';
+                  if (savedGame) {
+                    const parsed = JSON.parse(savedGame);
+                    codeContext = parsed.originalCode || '';
+                  }
+                  handleQuestionSelect("explainCode", "Can you explain the code with examples showing sample inputs and outputs?", codeContext);
+                }}
                 variant="outline"
                 className="h-auto py-4 text-left justify-start"
               >

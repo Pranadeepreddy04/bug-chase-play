@@ -9,10 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTestRunner } from '@/hooks/useTestRunner';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Bug, Shield, Download } from 'lucide-react';
+import { Zap, Bug, Shield, Download, Shuffle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
+import { codingChallenges } from '@/data/codingChallenges';
 
 type GamePhase = 'setup' | 'playing' | 'finished';
 
@@ -89,6 +90,7 @@ export const TestDuel = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [winner, setWinner] = useState<'tester' | 'saboteur' | null>(null);
   
+  const [currentChallengeIndex, setCurrentChallengeIndex] = useState(0);
   const [originalCode, setOriginalCode] = useState(initialCode);
   const [modifiedCode, setModifiedCode] = useState(initialCode);
   const [testCode, setTestCode] = useState(initialTests);
@@ -151,6 +153,16 @@ export const TestDuel = () => {
     };
     localStorage.setItem('test-duel-progress', JSON.stringify(gameState));
     localStorage.setItem(`test-duel-completed-${Date.now()}`, JSON.stringify(gameState));
+  };
+
+  const handleLoadNewChallenge = () => {
+    const randomIndex = Math.floor(Math.random() * codingChallenges.length);
+    const challenge = codingChallenges[randomIndex];
+    setCurrentChallengeIndex(randomIndex);
+    setOriginalCode(challenge.initialCode);
+    setModifiedCode(challenge.initialCode);
+    setTestCode(challenge.initialTests);
+    toast.success(`Loaded: ${challenge.title} (${challenge.difficulty})`);
   };
 
   const handleStartGame = () => {
@@ -374,19 +386,40 @@ export const TestDuel = () => {
             </div>
             
             <div className="space-y-4">
-              <div className="flex items-center gap-4 p-4 bg-card rounded-lg border">
-                <label className="text-sm font-medium">Number of Rounds (N):</label>
-                <input 
-                  type="number" 
-                  min="1" 
-                  max="10" 
-                  value={maxRounds}
-                  onChange={(e) => setMaxRounds(parseInt(e.target.value) || 5)}
-                  className="w-20 px-3 py-2 rounded-md border bg-background"
-                />
-                <span className="text-xs text-muted-foreground">
-                  Saboteur must introduce {maxRounds} bugs. If Tester catches all, Tester wins!
-                </span>
+              <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-lg border">
+                <div className="flex items-center gap-4">
+                  <label className="text-sm font-medium">Number of Rounds (N):</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    max="10" 
+                    value={maxRounds}
+                    onChange={(e) => setMaxRounds(parseInt(e.target.value) || 5)}
+                    className="w-20 px-3 py-2 rounded-md border bg-background"
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Saboteur must introduce {maxRounds} bugs. If Tester catches all, Tester wins!
+                  </span>
+                </div>
+                <Button
+                  onClick={handleLoadNewChallenge}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Shuffle className="h-4 w-4" />
+                  Try New Challenge
+                </Button>
+              </div>
+              <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <p className="text-sm font-medium text-center">
+                  Current Challenge: {codingChallenges[currentChallengeIndex].title} 
+                  <Badge variant="outline" className="ml-2">
+                    {codingChallenges[currentChallengeIndex].difficulty}
+                  </Badge>
+                </p>
+                <p className="text-xs text-muted-foreground text-center mt-1">
+                  {codingChallenges[currentChallengeIndex].description}
+                </p>
               </div>
 
               <CodeEditor
