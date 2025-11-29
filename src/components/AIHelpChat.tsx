@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Loader2 } from "lucide-react";
+import { MessageCircle, Send, Loader2, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -12,11 +13,13 @@ type QuestionType = "error" | "howToPlay" | "explainCode" | "general";
 
 export const AIHelpChat = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showQuestions, setShowQuestions] = useState(true);
+  const [showGreeting, setShowGreeting] = useState(true);
+  const [showQuestions, setShowQuestions] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [questionType, setQuestionType] = useState<QuestionType>("general");
+  const [userName, setUserName] = useState<string>("there");
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -25,6 +28,34 @@ export const AIHelpChat = () => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("id", user.id)
+          .single();
+        
+        if (profile?.display_name) {
+          setUserName(profile.display_name);
+        }
+      }
+    };
+    
+    if (isOpen) {
+      fetchUserProfile();
+      // Show greeting for 2 seconds before questions
+      const timer = setTimeout(() => {
+        setShowGreeting(false);
+        setShowQuestions(true);
+      }, 2500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   const handleQuestionSelect = (type: QuestionType, question: string) => {
     setQuestionType(type);
@@ -113,32 +144,65 @@ export const AIHelpChat = () => {
 
   const handleReset = () => {
     setMessages([]);
-    setShowQuestions(true);
+    setShowGreeting(true);
+    setShowQuestions(false);
     setQuestionType("general");
+    
+    // Show greeting again for 2 seconds
+    setTimeout(() => {
+      setShowGreeting(false);
+      setShowQuestions(true);
+    }, 2500);
   };
 
   return (
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-primary hover:bg-primary/90 shadow-lg z-50"
+        className="fixed bottom-6 right-6 h-16 w-16 rounded-full bg-gradient-to-br from-primary via-purple-500 to-pink-500 hover:scale-110 transition-transform shadow-2xl z-50 animate-pulse"
         size="icon"
       >
-        <MessageCircle className="h-6 w-6" />
+        <div className="flex flex-col items-center justify-center">
+          <Sparkles className="h-5 w-5 mb-0.5" />
+          <span className="text-xs font-bold">AI</span>
+        </div>
       </Button>
 
       <Dialog open={isOpen} onOpenChange={(open) => {
         setIsOpen(open);
         if (!open) {
-          handleReset();
+          setMessages([]);
+          setShowGreeting(true);
+          setShowQuestions(false);
+          setQuestionType("general");
         }
       }}>
         <DialogContent className="sm:max-w-[600px] h-[600px] flex flex-col p-0">
           <DialogHeader className="px-6 py-4 border-b">
-            <DialogTitle>AI Help Assistant</DialogTitle>
+            <DialogTitle>Bittu AI Assistant</DialogTitle>
           </DialogHeader>
 
-          {showQuestions ? (
+          {showGreeting ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6">
+              <div className="relative">
+                <div className="absolute inset-0 animate-ping opacity-20">
+                  <Sparkles className="h-24 w-24 text-primary" />
+                </div>
+                <Sparkles className="h-24 w-24 text-primary animate-bounce" />
+              </div>
+              <div className="text-center space-y-2 animate-fade-in">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
+                  Hi {userName}! 👋
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  This is <span className="font-semibold text-primary">Bittu AI</span>
+                </p>
+                <p className="text-xl font-medium mt-4">
+                  How can I help you today?
+                </p>
+              </div>
+            </div>
+          ) : showQuestions ? (
             <div className="flex-1 p-6 flex flex-col gap-4">
               <p className="text-muted-foreground mb-2">How can I help you today?</p>
               <Button
