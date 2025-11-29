@@ -47,13 +47,6 @@ export const AIHelpChat = () => {
     
     if (isOpen) {
       fetchUserProfile();
-      // Show greeting for 2 seconds before questions
-      const timer = setTimeout(() => {
-        setShowGreeting(false);
-        setShowQuestions(true);
-      }, 2500);
-      
-      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
@@ -147,12 +140,11 @@ export const AIHelpChat = () => {
     setShowGreeting(true);
     setShowQuestions(false);
     setQuestionType("general");
-    
-    // Show greeting again for 2 seconds
-    setTimeout(() => {
-      setShowGreeting(false);
-      setShowQuestions(true);
-    }, 2500);
+  };
+
+  const handleGreetingClick = () => {
+    setShowGreeting(false);
+    setShowQuestions(true);
   };
 
   return (
@@ -183,7 +175,10 @@ export const AIHelpChat = () => {
           </DialogHeader>
 
           {showGreeting ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6">
+            <div 
+              onClick={handleGreetingClick}
+              className="flex-1 flex flex-col items-center justify-center p-6 gap-6 cursor-pointer hover:bg-muted/20 transition-colors"
+            >
               <div className="relative">
                 <div className="absolute inset-0 animate-ping opacity-20">
                   <Sparkles className="h-24 w-24 text-primary" />
@@ -199,6 +194,9 @@ export const AIHelpChat = () => {
                 </p>
                 <p className="text-xl font-medium mt-4">
                   How can I help you today?
+                </p>
+                <p className="text-sm text-muted-foreground mt-6 animate-pulse">
+                  Click anywhere to continue...
                 </p>
               </div>
             </div>
