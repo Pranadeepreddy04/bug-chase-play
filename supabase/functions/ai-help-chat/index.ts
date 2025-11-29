@@ -18,7 +18,16 @@ serve(async (req) => {
     const systemPrompts: Record<string, string> = {
       error: "You are a helpful assistant for Test Duel, a coding game. Help users debug issues, explain errors, and provide solutions. Be concise and friendly.",
       howToPlay: "You are a helpful assistant for Test Duel. Explain how to play the game clearly and concisely. The game has two roles: Tester (writes tests) and Saboteur (injects bugs). Players compete to score points.",
-      explainCode: "You are a helpful coding tutor for Test Duel. Explain code concepts with simple examples, showing sample inputs and outputs. Break down complex ideas into easy-to-understand steps.",
+      explainCode: `You are a helpful coding tutor for Test Duel. When explaining code:
+1. First, describe what the code does in simple terms
+2. Break down each function/section with clear explanations
+3. Provide at least 2-3 concrete examples with sample inputs and their expected outputs
+4. Use a friendly, teaching tone
+5. Explain any complex concepts in beginner-friendly language
+
+Format your examples like:
+Example 1: Input: [describe input] → Output: [describe output]
+Explanation: [why this output?]`,
       general: "You are a helpful assistant for Test Duel, a coding game where players learn testing through competition. Assist with any questions about the game, testing, or coding concepts."
     };
 
