@@ -5,3 +5,12 @@ verify_jwt = false
 
 [functions.ai-help-chat]
 verify_jwt = false
+
+[functions.send-otp]
+verify_jwt = false
+
+[functions.send-password-reset-otp]
+verify_jwt = false
+
+[functions.verify-password-reset-otp]
+verify_jwt = false
